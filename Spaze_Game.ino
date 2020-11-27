@@ -1,9 +1,28 @@
+
 #include <Arduino.h>
 #include <U8g2lib.h>
 
 #include <SPI.h>
 
-U8G2_SH1106_128X64_NONAME_F_4W_HW_SPI   u8g2  (U8G2_R0, 5, 22, 17);
+/*-------------------------------------Pins--------------------------------
+Screen                Using SPI
+GND             GND
+VDD             3.3V or Vin
+SCK             GPIO18
+SDA             GPIO23 (MOSI)
+RES             GPIO17
+DC              GPIO16
+CS              GPIO5
+
+Gyroscope MPU6050     Using I2C
+VCC             3.3V or Vin
+GND             GND
+SCL             GPIO22 (I2C SCL)
+SDA             GPIO21 (I2C SDA)
+-------------------------------------------------------------------------*/
+
+
+U8G2_SH1106_128X64_NONAME_F_4W_HW_SPI   u8g2  (U8G2_R0, 5, 16, 17);
 
 //static unsigned char Bitmap[8];
 int TempBitmapPos[] = {0,0};
@@ -31,7 +50,9 @@ struct Ship
 };
 //--------------------------------------------------Initializing structs--------------------------------------------
 struct Ship Player;
+struct Ship Enemy[3];
 //CreateShip(/*obj*/Player,/*Type*/ 0,/*spd*/ 10,/*HP*/ 5,/*LUx*/ 26,/*LUy*/ 32,/*BMNo*/ 2,/*BMA1*/ 1,/*BMA2*/ 2,/*BMA3*/ 0,/*BMx1*/ 0,/*BMy1*/ 0,/*BMx2*/ 2,/*BMy2*/ 1,/*BMx3*/ 0,/*BMy3*/ 0);
+//Does not like running functions outside main functions
 //----------------------------------------------------------------------------------------------------------------
 
 
@@ -51,61 +72,7 @@ void ShipDataDump(struct Ship obj)
 }
 
 
-unsigned char * Get_Bitmap(int Num)
-{
-  switch(Num)
-  {
-    case 0:           //No Bitmap/Reset bitmap data
-      *PntTempBitmapPos = 0;    //Assign width of bitmap
-      PntTempBitmapPos++;       //Go up to height field
-      *PntTempBitmapPos = 0;    //Assign height of bitmap
-      PntTempBitmapPos--;       //Go back to width field
-      static unsigned char Bitmap0[] = {0x00};
-      return Bitmap0;
-    case 1:           //Player ship 1 (Left part)
-      *PntTempBitmapPos = 3;    //Assign width of bitmap
-      PntTempBitmapPos++;       //Go up to height field
-      *PntTempBitmapPos = 7;    //Assign height of bitmap
-      PntTempBitmapPos--;       //Go back to width field
-      //static unsigned char Bitmap1[] = {0x04, 0x03, 0x05, 0x06, 0x05, 0x03, 0x04}; Gimp gives the value for the black pixels, which means I need to invert the picture before putting it here
-      static unsigned char Bitmap1[] = {0x03, 0x04, 0x02, 0x01, 0x02, 0x04, 0x03};
-      return Bitmap1;
-/*    Killed cause I don't think that the right method, but I am not sure
-      //Write the bitmap
-      Bitmap[0] = 0x04;
-      Bitmap[1] = 0x03;
-      Bitmap[2] = 0x05;
-      Bitmap[3] = 0x06;
-      Bitmap[4] = 0x05;
-      Bitmap[5] = 0x03;
-      Bitmap[6] = 0x04;
-      Bitmap[7] = 0x00;
 
-      return Bitmap;            //Return a pointer to the bitmap
-*/
-    case 2:           //Player ship 2 (Right part)
-      *PntTempBitmapPos = 6;    //Assign width of bitmap
-      PntTempBitmapPos++;       //Go up to height field
-      *PntTempBitmapPos = 3;    //Assign height of bitmap
-      PntTempBitmapPos--;       //Go back to width field
-      static unsigned char Bitmap2[] = {0x1d, 0x22, 0x1d};
-      return Bitmap2;
-/*
-      Bitmap[0] = 0x22; 
-      Bitmap[1] = 0x1d;
-      Bitmap[2] = 0x22;
-      Bitmap[3] = 0x00;
-      Bitmap[4] = 0x00;
-      Bitmap[5] = 0x00;
-      Bitmap[6] = 0x00;
-      Bitmap[7] = 0x00;
-      return Bitmap;
-*/
-    default:
-      Serial.println("Bitmap out of range");
-      return Bitmap0;
-  }
-}
 
 
 // Fills in the struct (Struct to fill, Type, speed, health, LUx and LUy = Left Upper corner coordinates, BMNo = Number of bitmaps, BMA = BitmapAddress, BMx and BMy = bitmap x and y relative to top left of sprite)
@@ -164,12 +131,18 @@ void DrawShipXBM(struct Ship obj)
   }
 }
 
+void Check_Input()
+{
+  //if digitalRead(
+  return;
+}
+
 void setup()
 {
   Serial.begin(115200);
   u8g2.begin();
-  //pinMode(4, OUTPUT);
-  //digitalWrite(4, HIGH);
+  pinMode(4, OUTPUT);
+  digitalWrite(4, HIGH);
   ShipSetup();
   ShipDataDump(Player);
 }
