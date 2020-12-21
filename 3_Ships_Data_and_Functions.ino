@@ -1,34 +1,3 @@
-
-#include <Arduino.h>
-#include <U8g2lib.h>
-
-#include <SPI.h>
-
-/*-------------------------------------Pins--------------------------------
-Screen                Using SPI
-GND             GND
-VDD             3.3V or Vin
-SCK             GPIO18
-SDA             GPIO23 (MOSI)
-RES             GPIO17
-DC              GPIO16
-CS              GPIO5
-
-Gyroscope MPU6050     Using I2C
-VCC             3.3V or Vin
-GND             GND
-SCL             GPIO22 (I2C SCL)
-SDA             GPIO21 (I2C SDA)
--------------------------------------------------------------------------*/
-
-
-U8G2_SH1106_128X64_NONAME_F_4W_HW_SPI   u8g2  (U8G2_R0, 5, 16, 17);
-
-//static unsigned char Bitmap[8];
-int TempBitmapPos[] = {0,0};
-int *PntTempBitmapPos = TempBitmapPos;
-
-
 struct Ship
 {
   //-----------------------------Inner Data----------------------------------//
@@ -52,27 +21,8 @@ struct Ship
 struct Ship Player;
 struct Ship Enemy[3];
 //CreateShip(/*obj*/Player,/*Type*/ 0,/*spd*/ 10,/*HP*/ 5,/*LUx*/ 26,/*LUy*/ 32,/*BMNo*/ 2,/*BMA1*/ 1,/*BMA2*/ 2,/*BMA3*/ 0,/*BMx1*/ 0,/*BMy1*/ 0,/*BMx2*/ 2,/*BMy2*/ 1,/*BMx3*/ 0,/*BMy3*/ 0);
-//Does not like running functions outside main functions
+//Does not like running functions in global area
 //----------------------------------------------------------------------------------------------------------------
-
-
-void ShipDataDump(struct Ship obj)
-{
-  Serial.println(obj.Type);
-  Serial.println(obj.Speed);
-  Serial.println(obj.Health);
-  Serial.println(obj.BitmapNum);
-  for (int i; i<4; i++)
-  {
-    //printf("BitmapData1[%i] is: ", i); printf(obj.BitmapData1[i]); printf("\n");
-    //printf("BitmapData2[%i] is: ", i); printf(obj.BitmapData2[i]); printf("\n");
-    Serial.println(obj.BitmapData1[i]);
-    Serial.println(obj.BitmapData2[i]);
-  }
-}
-
-
-
 
 
 // Fills in the struct (Struct to fill, Type, speed, health, LUx and LUy = Left Upper corner coordinates, BMNo = Number of bitmaps, BMA = BitmapAddress, BMx and BMy = bitmap x and y relative to top left of sprite)
@@ -88,21 +38,23 @@ struct Ship CreateShip(struct Ship obj, int Type, int spd, int hp, int LUx, int 
   obj.TopLeftCoords[0] = LUx;
   obj.TopLeftCoords[1] = LUy;
   // Assign data for first bitmap
-  obj.PntBitmap1 = Get_Bitmap(BMA1);  obj.BitmapData1[0] = BM1x;  obj.BitmapData1[1] = BM1y;  obj.BitmapData1[2] = TempBitmapPos[0];  obj.BitmapData1[3] = TempBitmapPos[1];
+  obj.PntBitmap1 = Get_Bitmap(BMA1);  obj.BitmapData1[0] = BM1x;  obj.BitmapData1[1] = BM1y;  obj.BitmapData1[2] = TBmP[0];  obj.BitmapData1[3] = TBmP[1];
   // Assign data for second bitmap
-  obj.PntBitmap2 = Get_Bitmap(BMA2);  obj.BitmapData2[0] = BM2x;  obj.BitmapData2[1] = BM2y;  obj.BitmapData2[2] = TempBitmapPos[0];  obj.BitmapData2[3] = TempBitmapPos[1];
+  obj.PntBitmap2 = Get_Bitmap(BMA2);  obj.BitmapData2[0] = BM2x;  obj.BitmapData2[1] = BM2y;  obj.BitmapData2[2] = TBmP[0];  obj.BitmapData2[3] = TBmP[1];
   // Assign data for third bitmap
-  obj.PntBitmap3 = Get_Bitmap(BMA3);  obj.BitmapData3[0] = BM3x;  obj.BitmapData3[1] = BM3y;  obj.BitmapData3[2] = TempBitmapPos[0];  obj.BitmapData3[3] = TempBitmapPos[1];
+  obj.PntBitmap3 = Get_Bitmap(BMA3);  obj.BitmapData3[0] = BM3x;  obj.BitmapData3[1] = BM3y;  obj.BitmapData3[2] = TBmP[0];  obj.BitmapData3[3] = TBmP[1];
   return obj;
 }
 
+// Write the ships you want to create here, then the setup function will just run this function to create them
 void ShipSetup()
 {
-  Serial.println("ShipSetup ran");
-  //struct Ship Player;
+  //Serial.println("ShipSetup ran");    //Debug
+  //struct Ship Player;                 //Struct had to be initialized in global area, so this failed
   Player = CreateShip(/*obj*/Player,/*Type*/ 0,/*spd*/ 10,/*HP*/ 5,/*LUx*/ 26,/*LUy*/ 32,/*BMNo*/ 2,/*BMA1*/ 1,/*BMA2*/ 2,/*BMA3*/ 0,/*BMx1*/ 0,/*BMy1*/ 0,/*BMx2*/ 2,/*BMy2*/ 2,/*BMx3*/ 0,/*BMy3*/ 0);
 }
 
+// Draws a ship with max 3 bitmaps
 void DrawShipXBM(struct Ship obj)
 {
   switch(obj.BitmapNum)
@@ -129,29 +81,4 @@ void DrawShipXBM(struct Ship obj)
     default:
       Serial.println("Dahek is dis?");
   }
-}
-
-void Check_Input()
-{
-  //if digitalRead(
-  return;
-}
-
-void setup()
-{
-  Serial.begin(115200);
-  u8g2.begin();
-  pinMode(4, OUTPUT);
-  digitalWrite(4, HIGH);
-  ShipSetup();
-  ShipDataDump(Player);
-}
-
-void loop() 
-{
-  u8g2.clearBuffer();
-  DrawShipXBM(Player);
-  u8g2.drawCircle(100, 25, 10, U8G2_DRAW_ALL);
-  u8g2.sendBuffer();
-  delay(100);
 }
