@@ -13,3 +13,16 @@ void ShipDataDump(struct Ship obj)
     Serial.println(obj.BitmapData2[i]);
   }
 }
+
+void Menu_Navigation_Screen()
+{
+  u8g2.clearBuffer();
+  u8g2.drawStr(20, 16, "Welcome to the");
+  u8g2.drawStr(32, 32, "main menu");
+  char StringToDraw[50];
+  sprintf(StringToDraw, "Cursor value is %i", MenuCursor);
+  u8g2.drawStr(16, 48, StringToDraw);
+  u8g2.sendBuffer();
+  //printf("gy value is: %f \n", gy); 
+  Menu_Navigation();
+}

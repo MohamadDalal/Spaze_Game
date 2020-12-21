@@ -14,13 +14,9 @@ void Gyro_Init()
     Serial.print(millis());
     Serial.println("\tCould not connect to the gyroscope");
     //Menu = 2; // Errors screen
-    //ErrorMenu = 1; // Could not connect to Gyroscope
-    u8g2.clearBuffer();
-    u8g2.drawStr(0, 16, "No Gyroscope detected");
-    u8g2.drawStr(8, 32, "Please check that all");
-    u8g2.drawStr(8, 48, "wires are connected");
-    u8g2.sendBuffer();
-    delay(1000);
+    //SubMenu = 1; // Could not connect to Gyroscope
+    Gyro_Error_Screen();
+    delay(100);
   }
   Gyroscope.setAccelSensitivity(0);  // 2g
   Gyroscope.setGyroSensitivity(0);   // 250 degrees/s
