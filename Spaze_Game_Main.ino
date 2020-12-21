@@ -28,11 +28,11 @@ Right Button    GPIO33
 U8G2_SH1106_128X64_NONAME_F_4W_HW_SPI   u8g2  (U8G2_R0, 5, 16, 17);
 GY521 Gyroscope(0x68);
 
-int Menu = 2;               // Menu 0 is main menu, menu 1 is game menu, menu 2 is error menu
+int Menu = 0;               // Menu 0 is main menu, menu 1 is game menu, menu 2 is error menu
 // The two under have been replaced by the SubMenu
-//int MainMenu = 0;           // Menu 0 is the starting menu
-//int ErrorMenu = 0;          // Menu 0 is an error with no error, menu 1 is no gyroscope error.
-int SubMenu = 0;              // SubMenu for the Menues, it all depends on the Main Menu value
+//int MainMenu = 0;         // Menu 0 is the starting menu
+//int ErrorMenu = 0;        // Menu 0 is an error with no error, menu 1 is no gyroscope error.
+int SubMenu = 0;            // SubMenu for the Menues, it all depends on the Main Menu value
 /*--------------------------------Sub Menus--------------------------------
        Menu 0                       Menu 2
 SubMenu 0: Starting Menu      SubMenu 0: No Error Menu
@@ -44,8 +44,8 @@ Suggestion to make the submenus all have different numbers, so you don't get acc
 bool SlowCalRun = false;    // If this is true, then the program runs the slow calibration process
 int SlowCalTime = 0;        // Might be used to display a counter when the slow cal process is working (Will need to redesign how that thing works, if I want to implement this)
 int MenuCursor = 0;         // Used to show which thing the cursor is pointing at
-int LastMenu = 0;               // Used to know which menu the program has been run from, in case it needs to return to that menu
-int LastSubMenu = 0;            // Used to know which sub menu the program has been run from, in case it needs to return to that sub menu
+int LastMenu = 0;           // Used to know which menu the program has been run from, in case it needs to return to that menu
+int LastSubMenu = 0;        // Used to know which sub menu the program has been run from, in case it needs to return to that sub menu
 
 struct Ship
 {
@@ -121,7 +121,9 @@ void loop()
     if(SubMenu == 0)
     {
       //Serial.println("Switch 00");
-      Menu_Navigation_Screen();
+      //Menu_Navigation_Screen();
+      Main_Menu();
+      Menu_Navigation();
     }
     delay(100);
   }

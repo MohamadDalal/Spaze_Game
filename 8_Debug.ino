@@ -24,5 +24,4 @@ void Menu_Navigation_Screen()
   u8g2.drawStr(16, 48, StringToDraw);
   u8g2.sendBuffer();
   //printf("gy value is: %f \n", gy); 
-  Menu_Navigation();
 }
