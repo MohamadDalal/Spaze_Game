@@ -2,6 +2,14 @@ unsigned long MNLastRan = 0;
 unsigned long LBLastRan = 0;
 unsigned long RBLastRan = 0;
 
+float PitchDZMax = 15;
+float PitchDZMin = 5;
+float RollYawDZMax = 30;
+float RollYawDZMin = 10;
+
+float MoveVert = 0;
+float MoveHor = 0;
+
 // Function to navigate through the menu using gyroscope and tilting motion
 void Menu_Navigation()
 {
@@ -68,4 +76,82 @@ bool RB_Press()
   {
     return false;
   }
+}
+
+void Game_Move_Vert()
+{
+  int MoveVertInt;
+  // Positive pitch is down
+  // Negtive pitch is up
+  Gyro_Read();
+  
+  if(Pitch > PitchDZMin)    // Down Switched to UP
+  {
+    Serial.println("Down the ship goes");
+    if(Player.BottomRightCoords[1] >= 63)
+    {
+      Serial.println("Ship went too much down");
+      return;
+    }
+    if(MoveVert > 0)
+    {
+      MoveVert = 0;
+    }
+    if(Pitch > PitchDZMax)
+    {
+      MoveVert += (Player.Speed / 10);
+      MoveVertInt = int(MoveVert);
+      Player.TopLeftCoords[1] += MoveVertInt;
+      Player.BottomRightCoords[1] += MoveVertInt;
+      MoveVert -= MoveVertInt;
+    }
+    else
+    {
+      MoveVert += ((Pitch - PitchDZMin)/(PitchDZMax - PitchDZMin)) * (Player.Speed / 10);
+      MoveVertInt = int(MoveVert);
+      Player.TopLeftCoords[1] += MoveVertInt;
+      Player.BottomRightCoords[1] += MoveVertInt;
+      MoveVert -= MoveVertInt;
+    }
+  }
+
+  
+  if(Pitch < -PitchDZMin)    // Up Switched to Down
+  {
+    Serial.println("Up the ship goes");
+    if(Player.TopLeftCoords[1] <= 0)
+    {
+      Serial.println("Ship went too much up");
+      return;
+    }
+    if(MoveVert < 0)
+    {
+      MoveVert = 0;
+    }
+    if(Pitch < -PitchDZMax)
+    {
+      MoveVert -= (Player.Speed / 10);
+      MoveVertInt = int(MoveVert);
+      Player.TopLeftCoords[1] += MoveVertInt;
+      Player.BottomRightCoords[1] += MoveVertInt;
+      MoveVert -= MoveVertInt;
+    }
+    else
+    {
+      MoveVert += ((Pitch + PitchDZMin)/(PitchDZMax - PitchDZMin)) * (Player.Speed / 10);
+      MoveVertInt = int(MoveVert);
+      Player.TopLeftCoords[1] += MoveVertInt;
+      Player.BottomRightCoords[1] += MoveVertInt;
+      MoveVert -= MoveVertInt;
+    }
+  }
+}
+
+
+void Game_Move_Hor()
+{
+  // Positive Roll is left
+  // Negative Roll is right
+  // Yaw is unused Might make an option to change controlls from Roll to Yaw
+  Gyro_Read;
 }

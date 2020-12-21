@@ -12,10 +12,31 @@ struct Ship CreateShip(struct Ship obj, int Type, int spd, int hp, int LUx, int 
   obj.TopLeftCoords[1] = LUy;
   // Assign data for first bitmap
   obj.PntBitmap1 = Get_Bitmap(BMA1);  obj.BitmapData1[0] = BM1x;  obj.BitmapData1[1] = BM1y;  obj.BitmapData1[2] = TBmP[0];  obj.BitmapData1[3] = TBmP[1];
+  int BM1RightCoord = BM1x + TBmP[0];         // Get the Rightmost pixel of the bitmap in relation to the LeftUpper point of the sprite
+  int BM1BottomCoord = BM1y + TBmP[1];        // Get the Bottommost pixel of the bitmap in relation to the LeftUpper point of the sprite
   // Assign data for second bitmap
   obj.PntBitmap2 = Get_Bitmap(BMA2);  obj.BitmapData2[0] = BM2x;  obj.BitmapData2[1] = BM2y;  obj.BitmapData2[2] = TBmP[0];  obj.BitmapData2[3] = TBmP[1];
+  int BM2RightCoord = BM2x + TBmP[0];         // Get the Rightmost pixel of the bitmap in relation to the LeftUpper point of the sprite
+  int BM2BottomCoord = BM2y + TBmP[1];        // Get the Bottommost pixel of the bitmap in relation to the LeftUpper point of the sprite
   // Assign data for third bitmap
   obj.PntBitmap3 = Get_Bitmap(BMA3);  obj.BitmapData3[0] = BM3x;  obj.BitmapData3[1] = BM3y;  obj.BitmapData3[2] = TBmP[0];  obj.BitmapData3[3] = TBmP[1];
+  int BM3RightCoord = BM3x + TBmP[0];         // Get the Rightmost pixel of the bitmap in relation to the LeftUpper point of the sprite
+  int BM3BottomCoord = BM3y + TBmP[1];        // Get the Bottommost pixel of the bitmap in relation to the LeftUpper point of the sprite
+
+  //Serial.print("BM1RightCoord is: "); Serial.println(BM1RightCoord);
+  //Serial.print("BM2RightCoord is: "); Serial.println(BM2RightCoord);
+  //Serial.print("BM3RightCoord is: "); Serial.println(BM3RightCoord);
+  int TempBMMaxR = max(BM1RightCoord, BM2RightCoord);     // Compare the Rightmost point of bitmap 1 and 2
+  //Serial.print("TempBMMaxR is: "); Serial.println(TempBMMaxR);
+
+  //Serial.print("BM1BottomCoord is: "); Serial.println(BM1BottomCoord);
+  //Serial.print("BM2BottomCoord is: "); Serial.println(BM2BottomCoord);
+  //Serial.print("BM3BottomCoord is: "); Serial.println(BM3BottomCoord);
+  int TempBMMaxB = max(BM1BottomCoord, BM2BottomCoord);    // Compare the Bottommost point of bitmap 1 and 2
+  //Serial.print("TempBMMaxB is: "); Serial.println(TempBMMaxB);
+ 
+  obj.BottomRightCoords[0] = LUx  + max(TempBMMaxR, BM3RightCoord) - 1;    // Compare the Rightmost point of the max from the last comparison and Bitmap 3. This give the rightmost point of the sprite. -1 becuase the pixels begin counting from 0, a sprite of width 7 has the last pixel at 6 not 7
+  obj.BottomRightCoords[1] = LUy + max(TempBMMaxB, BM3BottomCoord) - 1;   // Compare the Bottommost point of the max from the last comparison and Bitmap 3. This give the Bottommost point of the sprite. Same as above
   return obj;
 }
 

@@ -1,10 +1,16 @@
 // Prints the values inside the struct of a specific ship object
 void ShipDataDump(struct Ship obj)
 {
+  Serial.print("Type is ");
   Serial.println(obj.Type);
+  Serial.print("Speed is ");
   Serial.println(obj.Speed);
+  Serial.print("Health is ");
   Serial.println(obj.Health);
+  Serial.print("Number of bitmaps is ");
   Serial.println(obj.BitmapNum);
+  
+  Serial.println("Bitmap data:");
   for (int i; i<4; i++)
   {
     //printf("BitmapData1[%i] is: ", i); printf(obj.BitmapData1[i]); printf("\n");
@@ -12,6 +18,14 @@ void ShipDataDump(struct Ship obj)
     Serial.println(obj.BitmapData1[i]);
     Serial.println(obj.BitmapData2[i]);
   }
+  Serial.print("Leftmost coord is ");
+  Serial.println(obj.TopLeftCoords[0]);
+  Serial.print("Topmost coord is ");
+  Serial.println(obj.TopLeftCoords[1]);
+  Serial.print("Rightmost coord is ");
+  Serial.println(obj.BottomRightCoords[0]);
+  Serial.print("Bottommost coord is ");
+  Serial.println(obj.BottomRightCoords[1]);
 }
 
 void Menu_Navigation_Screen()

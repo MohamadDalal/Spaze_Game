@@ -44,6 +44,7 @@ Suggestion to make the submenus all have different numbers, so you don't get acc
 bool SlowCalRun = false;    // If this is true, then the program runs the slow calibration process
 int SlowCalTime = 0;        // Might be used to display a counter when the slow cal process is working (Will need to redesign how that thing works, if I want to implement this)
 int MenuCursor = 0;         // Used to show which thing the cursor is pointing at
+bool UseYaw = false;
 int LastMenu = 0;           // Used to know which menu the program has been run from, in case it needs to return to that menu
 int LastSubMenu = 0;        // Used to know which sub menu the program has been run from, in case it needs to return to that sub menu
 
@@ -56,6 +57,7 @@ struct Ship
   
   //------------------------------Visual Data--------------------------------//
   int TopLeftCoords[2]; //Coordinates of top left pixel first is x then is y
+  int BottomRightCoords[2]; // Coordinates of the bottom right pixle, first is x then is y. This is taken to know how high and wide the ship is
   int BitmapNum;    //Amount of bitmaps to be used. sprite might be split in different parts. Currently capped at 3
   //int HitboxNum;    //Number of hitboxes // Decided to tie hitboxes to bitmaps, will be added if needed
   int BitmapData1[4]; // [x position relative to TopLeftCoords, y position relative to TopLeftCoords, Width, Height]
@@ -141,6 +143,7 @@ void loop()
             Menu = 1;
             SubMenu = 0;
             MenuCursor = 0;
+            Gyro_Fast_Cal();
             delay(100);
             return;
           case 1:
@@ -200,6 +203,16 @@ void loop()
   {
     //Serial.println("Switch 2");
     Game_Screen();
+    Game_Move_Vert();
+    Game_Move_Hor();
+    if(LB_Press())
+      {
+        Serial.println("LB_Pressed in game");
+        Gyro_Fast_Cal();
+        u8g2.drawCircle(100, 25, 10, U8G2_DRAW_ALL);
+        u8g2.sendBuffer();
+        return;
+      }
     delay(100);
   }
   else if(Menu == 2)
