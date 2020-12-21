@@ -13,8 +13,13 @@ void Gyro_Init()
   {
     Serial.print(millis());
     Serial.println("\tCould not connect to the gyroscope");
-    Menu = 3; // Errors screen
-    ErrorMenu = 1; // Could not connect to Gyroscope
+    //Menu = 2; // Errors screen
+    //ErrorMenu = 1; // Could not connect to Gyroscope
+    u8g2.clearBuffer();
+    u8g2.drawStr(0, 16, "No Gyroscope detected");
+    u8g2.drawStr(8, 32, "Please check that all");
+    u8g2.drawStr(8, 48, "wires are connected");
+    u8g2.sendBuffer();
     delay(1000);
   }
   Gyroscope.setAccelSensitivity(0);  // 2g
@@ -36,7 +41,7 @@ void Gyro_Init()
 
 // Adjusted version of the calibration example from the GY521 library
 void Gyro_Slow_Cal()
-{
+{ 
   //Gyroscope.setThrottle(false);
   for(int i = 0; i < 100; i++)
   {
@@ -69,7 +74,7 @@ void Gyro_Slow_Cal()
   //MPU6050sensor.setThrottle();
 }
 
-
+// Resets the Pitch, Yaw and Roll values to 0
 void Gyro_Fast_Cal()
 {
   PitchCal = Gyroscope.getPitch();
@@ -77,6 +82,7 @@ void Gyro_Fast_Cal()
   RollCal = Gyroscope.getRoll(); 
 }
 
+// Read function to be run as much as possible
 void Gyro_Read()
 {
   Gyroscope.read(); // initiate sampling

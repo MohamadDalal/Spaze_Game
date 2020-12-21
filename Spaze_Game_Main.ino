@@ -28,11 +28,13 @@ Right Button    GPIO33
 U8G2_SH1106_128X64_NONAME_F_4W_HW_SPI   u8g2  (U8G2_R0, 5, 16, 17);
 GY521 Gyroscope(0x68);
 
-int Menu = 0;
-int MainMenu = 0;
-int ErrorMenu = 0;
+int Menu = 0;               // Menu 0 is main menu, menu 1 is game menu, menu 2 is error menu
+int MainMenu = 0;           // Menu 0 is the starting menu
+int ErrorMenu = 0;          // Menu 0 is an error with no error, menu 1 is no gyroscope error.
 
-int MenuCursor = 0;
+bool SlowCalRun = false;    // If this is true, then the program runs the slow calibration process
+int SlowCalTime = 0;        // Might be used to display a counter when the slow cal process is working (Will need to redesign how that thing works, if I want to implement this)
+int MenuCursor = 0;         // Used to show which thing the cursor is pointing at
 
 struct Ship
 {
@@ -65,46 +67,77 @@ void setup()
 {
   Serial.begin(115200);
   Wire.begin();
-  Gyro_Init();
   u8g2.begin();
+  u8g2.setFont(u8g2_font_ncenB08_tr);  // choose a suitable font
+  Gyro_Init();
   pinMode(32, INPUT);
   pinMode(33, INPUT);
   ShipSetup();
-  ShipDataDump(Player);
-
-  u8g2.clearBuffer();
-  u8g2.drawStr(32, 32, "Calibrating");
-  u8g2.drawStr(24, 48, "Takes 5 seconds");
-  
-  u8g2.sendBuffer();
-  
-  Gyro_Slow_Cal();
+  //ShipDataDump(Player);
+  Serial.println("Setup ran 1");
+  if(ErrorMenu != 3)
+  {  
+    SlowCalRun = true;
+  }
+  Serial.println("Setup ran fully");
 }
 
 void loop() 
 {
-  switch(Menu)
+  //Serial.println("Loop started running");
+  Gyro_Read();
+  if(SlowCalRun)
+   {
+     u8g2.clearBuffer();
+     u8g2.drawStr(32, 32, "Calibrating");
+     u8g2.drawStr(24, 48, "Takes 5 seconds");
+     u8g2.sendBuffer();
+     Gyro_Slow_Cal();
+     SlowCalRun = false;
+   }
+  if(Menu == 0)
   {
-    case 0:                 //Main Menu
-      switch(MainMenu)
-        {
-        case 0:
-          u8g2.clearBuffer();
-          u8g2.drawStr(32, 32, "Welcome to the main menu");
-          char StringToDraw[50];
-          sprintf(StringToDraw, "Cursor value is %i", MenuCursor);
-          u8g2.drawStr(24, 48, StringToDraw);
-          u8g2.sendBuffer();
-          Menu_Navigation();
-          delay(100);
-        default:
-          delay(20);
-        }
-    default:
+    //Serial.println("Switch 0");
+    if(MainMenu == 0)
+    {
+      //Serial.println("Switch 00");
       u8g2.clearBuffer();
-      DrawShipXBM(Player);
-      //u8g2.drawCircle(100, 25, 10, U8G2_DRAW_ALL);
+      u8g2.drawStr(20, 16, "Welcome to the");
+      u8g2.drawStr(32, 32, "main menu");
+      char StringToDraw[50];
+      sprintf(StringToDraw, "Cursor value is %i", MenuCursor);
+      u8g2.drawStr(16, 48, StringToDraw);
       u8g2.sendBuffer();
-      delay(100);
+      //printf("gy value is: %f \n", gy); 
+      Menu_Navigation();
+    }
+    delay(100);
+  }
+  else if(Menu == 1)
+  {
+    //Serial.println("Switch 2");
+    u8g2.clearBuffer();
+    DrawShipXBM(Player);
+    //u8g2.drawCircle(100, 25, 10, U8G2_DRAW_ALL);
+    u8g2.sendBuffer();
+    delay(100);
+  }
+  else if(Menu == 2)
+  {
+    if(ErrorMenu == 1)        // Gyro error screen has been moved to the init function itself. This might either be useful or be deleted later
+    {
+      u8g2.clearBuffer();
+      u8g2.drawStr(16, 16, "No Gyroscope detected");
+      u8g2.drawStr(16, 32, "Please check connectors");
+      u8g2.drawStr(16, 48, "And restart the device");
+      u8g2.sendBuffer();
+      if(Gyroscope.isConnected())
+      {
+        Menu = 0;
+        MainMenu = 0;
+        // This will need to be redone later, so that it returns you to the place u were in before it happened
+        // If I can't figure that out, then it will just reset the esp when it happens (Or return u to the main menu)
+      }
+    }
   }
 }

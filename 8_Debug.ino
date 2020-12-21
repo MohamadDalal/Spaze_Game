@@ -1,3 +1,4 @@
+// Prints the values inside the struct of a specific ship object
 void ShipDataDump(struct Ship obj)
 {
   Serial.println(obj.Type);

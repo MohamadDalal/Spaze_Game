@@ -3,7 +3,7 @@
 // Use the bitmaps in order, so if only one bitmap is needed, then it has to be the first one
 struct Ship CreateShip(struct Ship obj, int Type, int spd, int hp, int LUx, int LUy, int BMNo, int BMA1, int BMA2, int BMA3, int BM1x, int BM1y, int BM2x, int BM2y, int BM3x, int BM3y)
 {
-  Serial.println("CreateShip function ran");
+  //Serial.println("CreateShip function ran");
   obj.Type = Type;
   obj.Speed = spd;
   obj.Health = hp;
