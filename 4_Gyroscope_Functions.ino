@@ -1,8 +1,8 @@
-/*
 float ax, ay, az, gx, gy, gz, temp, Pitch, Roll, Yaw, PitchCal, RollCal, YawCal;
 //float cal = 0.00;
 //int calCounter = 0;
 //int lightMode = 0;
+
 //char dir[12];
 
 // Adjusted version from Jens' barometer
@@ -91,4 +91,3 @@ void Gyro_Read()
   Yaw = Gyroscope.getYaw() - YawCal;
   Roll = Gyroscope.getRoll() - RollCal;
 }
-*/

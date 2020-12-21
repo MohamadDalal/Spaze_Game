@@ -1,4 +1,3 @@
-/*
 int Menu_Navigation()
 {
   if(gx > 40) //Down
@@ -10,4 +9,3 @@ int Menu_Navigation()
     MenuCursor--;
   }
 }
-*/
