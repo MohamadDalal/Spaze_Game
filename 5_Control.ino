@@ -20,7 +20,7 @@ void Menu_Navigation()
   {
     if((millis() - MNLastRan) < 250)
     {
-      Serial.println("Millis effect");
+      Serial.println("MN Millis effect");
       return;
     }
     Serial.println("Up it goes");
@@ -31,12 +31,15 @@ void Menu_Navigation()
 
 bool LB_Press()
 {
+  //Serial.println("LB_Press Ran");
   if((millis() - LBLastRan) < 250)
   {
     Serial.println("LB Millis effect");
     return false;
   }
-  if (digitalRead(32))
+  //Serial.print("GPIO32 is");
+  //Serial.println(digitalRead(32));
+  if (digitalRead(32) == 1)
   {
     Serial.println("LB Pressed");
     LBLastRan = millis();
@@ -55,7 +58,7 @@ bool RB_Press()
     Serial.println("RB Millis effect");
     return false;
   }
-  if (digitalRead(33))
+  if (digitalRead(33) == 1)
   {
     Serial.println("RB Pressed");
     RBLastRan = millis();

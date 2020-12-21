@@ -30,9 +30,28 @@ void Game_Screen()
   //delay(100);
 }
 
-void Controls_Screen()
+void Help_Screen()
 {
-  delay(10);
+  u8g2.clearBuffer();
+  u8g2.drawStr(32, 8, "Basics");
+  u8g2.drawStr(32, 24, "Controls");
+  u8g2.drawStr(32, 40, "PowerUps");
+  u8g2.drawStr(8, (MenuCursor * 16 + 8), "-->");
+  u8g2.setFont(u8g2_font_p01type_tr);
+  u8g2.drawStr(2, 56, "LB:BACK");
+  u8g2.drawStr(84, 56, "RB:SELECT");
+  u8g2.setFont(u8g2_font_ncenB08_tr);
+  u8g2.sendBuffer();
+}
+
+void Coming_Soon()
+{
+  u8g2.clearBuffer();
+  u8g2.drawStr(26, 32, "Coming Soon");
+  u8g2.setFont(u8g2_font_p01type_tr);
+  u8g2.drawStr(2, 56, "LB:BACK");
+  u8g2.setFont(u8g2_font_ncenB08_tr);
+  u8g2.sendBuffer();
 }
 
 void Unknown_Error_Screen()

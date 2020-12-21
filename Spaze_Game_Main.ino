@@ -104,8 +104,8 @@ void loop()
     SubMenu = 1;
   }
   //Serial.println("Loop started running");
-  printf("3-Menu is %i \n", Menu);
-  printf("3-SubMenu is %i \n", SubMenu);
+  //printf("3-Menu is %i \n", Menu);
+  //printf("3-SubMenu is %i \n", SubMenu);
   Gyro_Read();
   if(SlowCalRun)
   {
@@ -113,8 +113,8 @@ void loop()
     Gyro_Slow_Cal();
     SlowCalRun = false;
   }
-  printf("4-Menu is %i \n", Menu);
-  printf("4-SubMenu is %i \n", SubMenu);
+  //printf("4-Menu is %i \n", Menu);
+  //printf("4-SubMenu is %i \n", SubMenu);
   if(Menu == 0)
   {
     //Serial.println("Switch 0");
@@ -124,6 +124,75 @@ void loop()
       //Menu_Navigation_Screen();
       Main_Menu();
       Menu_Navigation();
+      if(LB_Press())
+      {
+        Serial.println("LB_Pressed in main menu");
+        SlowCalRun = true;
+        delay(500);
+        return;
+      }
+      else if(RB_Press())
+      {
+        Serial.println("RB_Pressed in main menu");
+        switch(MenuCursor)
+        {
+          case 0:
+            //Serial.println("RB_Pressed case 0");
+            Menu = 1;
+            SubMenu = 0;
+            MenuCursor = 0;
+            delay(100);
+            return;
+          case 1:
+            //Serial.println("RB_Pressed case 1");
+            Menu = 0;
+            SubMenu = 1;
+            MenuCursor = 0;
+            delay(100);
+            return;
+          case 2:
+            //Serial.println("RB_Pressed case 2");
+            Menu = 0;
+            SubMenu = 2;
+            MenuCursor = 0;
+            delay(100);
+            return;
+          default:
+            Menu = 2;
+            SubMenu = 0;
+            MenuCursor = 0;
+            delay(100);
+            return;
+        }
+      }
+    }
+    else if(SubMenu == 1)
+    {
+      //Serial.println("Menu 0 SubMenu 1");
+      Help_Screen();
+      Menu_Navigation();
+      if(LB_Press())
+      {
+        SubMenu = 0;
+        delay(100);
+        return;
+      }
+    }
+    else if(SubMenu == 2)
+    {
+      //Serial.println("Menu 0 SubMenu 1");
+      Coming_Soon();
+      if(LB_Press())
+      {
+        SubMenu = 0;
+        delay(100);
+        return;
+      }
+    }
+    else
+    {
+      Menu = 2;
+      SubMenu = 0;
     }
     delay(100);
   }
