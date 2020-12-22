@@ -1,4 +1,4 @@
-float ax, ay, az, gx, gy, gz, temp, Pitch, Roll, Yaw, PitchCal, RollCal, YawCal;
+float ax, ay, az, gx, gy, gz, temp, Pitch, Roll, Yaw, PitchCal, RollCal, YawCal;    // Initialize the reading constants and fast calibrator constants
 //float cal = 0.00;
 //int calCounter = 0;
 //int lightMode = 0;
@@ -6,24 +6,26 @@ float ax, ay, az, gx, gy, gz, temp, Pitch, Roll, Yaw, PitchCal, RollCal, YawCal;
 //char dir[12];
 
 // Adjusted version from Jens' barometer
+// Starts the Gyroscope
 void Gyro_Init()
 {
   delay(100);
-  while (Gyroscope.wakeup() == false)
+  while (Gyroscope.wakeup() == false)                         // Wake up the gyroscope and check that it is connected
   {
     Serial.print(millis());
-    Serial.println("\tCould not connect to the gyroscope");
+    Serial.println("\tCould not connect to the gyroscope");   // If not print an error
     //Menu = 2; // Errors screen
     //SubMenu = 1; // Could not connect to Gyroscope
-    Gyro_Error_Screen();
+    Gyro_Error_Screen();                                      // Run the Gyro Error screen (Which has a while loop inside. Now that I think about it these are two while loops that do the same thing)
     delay(100);
   }
-  Gyroscope.setAccelSensitivity(0);  // 2g
-  Gyroscope.setGyroSensitivity(0);   // 250 degrees/s
+  Gyroscope.setAccelSensitivity(0);  // 0 = 2g, 1 = 4g, 2 = 8g, 4 = 16g
+  Gyroscope.setGyroSensitivity(0);   // 0 = 250 degrees/s, 1 = 500 degrees/s, 2 = 1000 degrees/s, 3 = 2000 degrees/s
 
-  Gyroscope.setThrottle(false);
+  Gyroscope.setThrottle(false);      // Throttling is a delay in the gyroscope reading. This is not enabled as the program itself has enough delay
   Serial.println("start...");
 
+  // Reset the error values. They will be adjusted by the slow calibrator and the fast calibrator
   Gyroscope.axe = 0;
   Gyroscope.aye = 0;
   Gyroscope.aze = 0;
@@ -35,7 +37,8 @@ void Gyro_Init()
   RollCal = 0;
 }
 
-// Adjusted version of the calibration example from the GY521 library
+// Adjusted version of the calibration example from the GY521 library. Didn't try to fully understand it, but it does some math
+// This is the slow calibrator. It calibrates the error values for the acceleration and rotational speed gotten from the gyroscope
 void Gyro_Slow_Cal()
 { 
   //Gyroscope.setThrottle(false);
@@ -70,7 +73,8 @@ void Gyro_Slow_Cal()
   //MPU6050sensor.setThrottle();
 }
 
-// Resets the Pitch, Yaw and Roll values to 0
+// This is the fast callibrator, it resets the Pitch, Yaw and Roll values to 0 so that you can reset the initial position when playing
+// This reset is done by making a calibration value for them, which is subtracted from the actualy values in the read function
 void Gyro_Fast_Cal()
 {
   PitchCal = Gyroscope.getPitch();
@@ -81,7 +85,7 @@ void Gyro_Fast_Cal()
 // Read function to be run as much as possible
 void Gyro_Read()
 {
-  Gyroscope.read(); // initiate sampling
+  Gyroscope.read();                             // initiate sampling
   ax = Gyroscope.getAccelX();
   ay = Gyroscope.getAccelY();
   az = Gyroscope.getAccelZ();

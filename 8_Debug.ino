@@ -28,6 +28,7 @@ void ShipDataDump(struct Ship obj)
   Serial.println(obj.BottomRightCoords[1]);
 }
 
+// This is a screen used to test the menu cursor navigation function
 void Menu_Navigation_Screen()
 {
   u8g2.clearBuffer();
