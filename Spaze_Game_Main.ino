@@ -54,8 +54,8 @@ int SubMenu = 0;            // SubMenu for the Menues, it all depends on the Mai
       Menu 0                        Menu 1                      Menu 2
 SubMenu 0: Starting Menu      Submenu 0: Game Menu        SubMenu 0: No Error Menu
 SubMenu 1: Settings Menu      Submenu 1: Pause Menu       SubMenu 1: No Gyro Menu
-SubMenu 2: Help Menu          
-SubMenu 3: Controlls Menu
+SubMenu 2: Help Menu          Submenu 2: Game Over
+SubMenu 3: Controlls Menu     Submenu 3: Score&Stats
 
 Suggestion to make the submenus all have different numbers, so you don't get accidental errors
 -----------------------------------------------------------------------------------------------*/

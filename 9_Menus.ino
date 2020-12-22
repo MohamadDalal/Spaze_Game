@@ -2,13 +2,23 @@
 void Main_Menu()
 {
   u8g2.clearBuffer();
-  u8g2.drawStr(32, 8, "Start Game");
-  u8g2.drawStr(32, 24, "Settings");
-  u8g2.drawStr(32, 40, "Help");
-  u8g2.drawStr(8, (MenuCursor * 16 + 8), "-->");
+  u8g2.drawStr(32, 10, "Start Game");
+  u8g2.drawStr(32, 26, "Settings");
+  u8g2.drawStr(32, 42, "Help");
+  u8g2.drawStr(8, (MenuCursor * 16 + 10), "-->");
   u8g2.setFont(u8g2_font_p01type_tr);
   u8g2.drawStr(2, 56, "LB:CALIBRATE");
+  //u8g2.drawStr(108, 26, "TILT");
+  u8g2.drawStr(62, 56, "TILT");
   u8g2.drawStr(84, 56, "RB:SELECT");
+  u8g2.setFontDirection(1);
+  //u8g2.drawStr(114, 32, "-->");
+  //u8g2.drawStr(114, 2, "<--");
+  //u8g2.drawStr(114, 16, "<");
+  //u8g2.drawStr(114, 29, ">");
+  u8g2.drawStr(68, 46, "<");
+  u8g2.drawStr(68, 59, ">");
+  u8g2.setFontDirection(0);
   u8g2.setFont(u8g2_font_ncenB08_tr);
   u8g2.sendBuffer();
   //delay(10);
@@ -43,7 +53,12 @@ void Help_Screen()
   u8g2.drawStr(8, (MenuCursor * 16 + 8), "-->");
   u8g2.setFont(u8g2_font_p01type_tr);
   u8g2.drawStr(2, 56, "LB:BACK");
+  u8g2.drawStr(50, 56, "TILT");
   u8g2.drawStr(84, 56, "RB:SELECT");
+  u8g2.setFontDirection(1);
+  u8g2.drawStr(56, 46, "<");
+  u8g2.drawStr(56, 59, ">");
+  u8g2.setFontDirection(0);
   u8g2.setFont(u8g2_font_ncenB08_tr);
   u8g2.sendBuffer();
 }
@@ -60,7 +75,12 @@ void Settings_Screen()
   u8g2.drawStr(8, (MenuCursor * 16 + 8), "-->");
   u8g2.setFont(u8g2_font_p01type_tr);
   u8g2.drawStr(2, 56, "LB:BACK");
+  u8g2.drawStr(50, 56, "TILT");
   u8g2.drawStr(84, 56, "RB:SELECT");
+  u8g2.setFontDirection(1);
+  u8g2.drawStr(56, 46, "<");
+  u8g2.drawStr(56, 59, ">");
+  u8g2.setFontDirection(0);
   u8g2.setFont(u8g2_font_ncenB08_tr);
   u8g2.sendBuffer();
 }
