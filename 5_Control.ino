@@ -112,11 +112,13 @@ void Game_Move_Vert()
   if(Pitch > PitchDZMin)    // Down
   {
     Serial.println("Down the ship goes");
+    /*
     if(Player.BottomRightCoords[1] >= 61)
     {
       Serial.println("Ship went too much down");
       return;
     }
+    */
     if(MoveVert < 0)
     {
       MoveVert = 0;
@@ -130,6 +132,11 @@ void Game_Move_Vert()
       MoveVertInt = MoveVert;
       //Serial.print("MoveVert after calcualtions 1 is: ");
       //Serial.println(MoveVert);
+      if((Player.BottomRightCoords[1] + MoveVertInt) >= 63)
+      {
+        Serial.println("Ship went too much down");
+        return;
+      }
       //Serial.print("MoveVertInt is: ");
       //Serial.println(MoveVertInt);
       Player.TopLeftCoords[1] += MoveVertInt;
@@ -147,6 +154,11 @@ void Game_Move_Vert()
       MoveVertInt = MoveVert;
       //Serial.print("MoveVert after calcualtions 1 is: ");
       //Serial.println(MoveVert);
+      if((Player.BottomRightCoords[1] + MoveVertInt) >= 63)
+      {
+        Serial.println("Ship went too much down");
+        return;
+      }
       //Serial.print("MoveVertInt is: ");
       //Serial.println(MoveVertInt);
       Player.TopLeftCoords[1] += MoveVertInt;
@@ -161,11 +173,13 @@ void Game_Move_Vert()
   if(Pitch < -PitchDZMin)    // Up
   {
     Serial.println("Up the ship goes");
+    /*
     if(Player.TopLeftCoords[1] <= 2)
     {
       Serial.println("Ship went too much up");
       return;
     }
+    */
     if(MoveVert > 0)
     {
       MoveVert = 0;
@@ -179,6 +193,11 @@ void Game_Move_Vert()
       MoveVertInt = MoveVert;
       //Serial.print("MoveVert after calcualtions 1 is: ");
       //Serial.println(MoveVert);
+      if((Player.TopLeftCoords[1] + MoveVertInt) <= 0)
+      {
+        Serial.println("Ship went too much up");
+        return;
+      }
       //Serial.print("MoveVertInt is: ");
       //Serial.println(MoveVertInt);
       Player.TopLeftCoords[1] += MoveVertInt;
@@ -196,6 +215,11 @@ void Game_Move_Vert()
       MoveVertInt = MoveVert;
       //Serial.print("MoveVert after calcualtions 1 is: ");
       //Serial.println(MoveVert);
+      if((Player.TopLeftCoords[1] + MoveVertInt) <= 0)
+      {
+        Serial.println("Ship went too much up");
+        return;
+      }
       //Serial.print("MoveVertInt is: ");
       //Serial.println(MoveVertInt);
       Player.TopLeftCoords[1] += MoveVertInt;
@@ -222,11 +246,13 @@ void Game_Move_Roll_Hor()
   if(Roll > RollYawDZMin)    // Left
   {
     Serial.println("Left the ship goes with Roll");
+    /*
     if(Player.TopLeftCoords[0] <= 2)
     {
       Serial.println("Ship went too much left ");
       return;
     }
+    */
     if(MoveHor > 0)
     {
       MoveHor = 0;
@@ -236,6 +262,11 @@ void Game_Move_Roll_Hor()
       //MoveHor -= (Speed / fps);
       MoveHor -= (Speed / (1000 / LoopTime));
       MoveHorInt = int(MoveHor);
+      if((Player.TopLeftCoords[0] + MoveHorInt) <= 0)
+      {
+        Serial.println("Ship went too much left ");
+        return;
+      }
       Player.TopLeftCoords[0] += MoveHorInt;
       Player.BottomRightCoords[0] += MoveHorInt;
       MoveHor -= MoveHorInt;
@@ -245,6 +276,11 @@ void Game_Move_Roll_Hor()
       //MoveHor -= ((Roll - RollYawDZMin)/(RollYawDZMax - RollYawDZMin)) * (Speed / fps);
       MoveHor -= ((Roll - RollYawDZMin)/(RollYawDZMax - RollYawDZMin)) * (Speed / (1000 / LoopTime));
       MoveHorInt = int(MoveHor);
+      if((Player.TopLeftCoords[0] + MoveHorInt) <= 0)
+      {
+        Serial.println("Ship went too much left ");
+        return;
+      }
       Player.TopLeftCoords[0] += MoveHorInt;
       Player.BottomRightCoords[0] += MoveHorInt;
       MoveHor -= MoveHorInt;
@@ -255,11 +291,13 @@ void Game_Move_Roll_Hor()
   if(Roll < -RollYawDZMin)    // Right
   {
     Serial.println("Right the ship goes with Roll");
+    /*
     if(Player.BottomRightCoords[0] >= 125)
     {
       Serial.println("Ship went too much right");
       return;
     }
+    */
     if(MoveHor < 0)
     {
       MoveHor = 0;
@@ -269,6 +307,11 @@ void Game_Move_Roll_Hor()
       //MoveHor += (Speed / fps);
       MoveHor += (Speed / (1000 / LoopTime));
       MoveHorInt = int(MoveHor);
+      if((Player.BottomRightCoords[0] + MoveHorInt) >= 127)
+      {
+        Serial.println("Ship went too much right");
+        return;
+      }
       Player.TopLeftCoords[0] += MoveHorInt;
       Player.BottomRightCoords[0] += MoveHorInt;
       MoveHor -= MoveHorInt;
@@ -278,6 +321,11 @@ void Game_Move_Roll_Hor()
       //MoveHor -= ((Roll + RollYawDZMin)/(RollYawDZMax - RollYawDZMin)) * (Speed / fps);
       MoveHor -= ((Roll + RollYawDZMin)/(RollYawDZMax - RollYawDZMin)) * (Speed / (1000 / LoopTime));
       MoveHorInt = int(MoveHor);
+      if((Player.BottomRightCoords[0] + MoveHorInt) >= 127)
+      {
+        Serial.println("Ship went too much right");
+        return;
+      }
       Player.TopLeftCoords[0] += MoveHorInt;
       Player.BottomRightCoords[0] += MoveHorInt;
       MoveHor -= MoveHorInt;
@@ -299,11 +347,13 @@ void Game_Move_Yaw_Hor()
   if(Yaw > RollYawDZMin)                                        // Is the Yaw angle higher than the min deadzone? (Left)
   {
     Serial.println("Left the ship goes with Yaw");
+    /*
     if(Player.TopLeftCoords[0] <= 2)                            // Is the player at the left edge?  
     {
       Serial.println("Ship went too much left ");
       return;                                                   // If so return without moving a pixle
     }
+    */
     if(MoveHor > 0)                                             // Was the last movement to the right? (A positive pixle moving value)
     {
       MoveHor = 0;                                              // Reset the pixle moving value
@@ -313,6 +363,11 @@ void Game_Move_Yaw_Hor()
       //MoveHor -= (Speed / fps);                                 // Full speed to the left (No angle ratio calculation)
       MoveHor -= (Speed / (1000 / LoopTime));
       MoveHorInt = int(MoveHor);                                // Make an integer, because pixles move in integers (If the moving thing is more than 1 then round down the value, else no moevement (Value is 0))
+      if((Player.TopLeftCoords[0] + MoveHorInt) <= 0)           // Check if the ship will go out of the screen after moving
+      {
+        Serial.println("Ship went too much left ");
+        return;                                                 // If so then don't move the ship. This is a better method than just preventing movement at the start fo the function, as was done before
+      }
       Player.TopLeftCoords[0] += MoveHorInt;                    // Move the value of the top left pixle (This is the one used in the draw function)
       Player.BottomRightCoords[0] += MoveHorInt;                // Move the value of the bottom right pixle (This is the one used in the edge detection)
       MoveHor -= MoveHorInt;                                    // If it actually moved some pixles, then remove this pixles from the movement value, so it does not move extra pixles next time this function is called
@@ -323,6 +378,11 @@ void Game_Move_Yaw_Hor()
       MoveHor -= ((Yaw - RollYawDZMin)/(RollYawDZMax - RollYawDZMin)) * (Speed / (1000 / LoopTime));
       // This is literally the same lines as above, just read the comments above
       MoveHorInt = int(MoveHor);
+      if((Player.TopLeftCoords[0] + MoveHorInt) <= 0)
+      {
+        Serial.println("Ship went too much left ");
+        return;
+      }
       Player.TopLeftCoords[0] += MoveHorInt;
       Player.BottomRightCoords[0] += MoveHorInt;
       MoveHor -= MoveHorInt;
@@ -333,11 +393,13 @@ void Game_Move_Yaw_Hor()
   if(Yaw < -RollYawDZMin)    // Right
   {
     Serial.println("Right the ship goes with Yaw");
+    /*
     if(Player.BottomRightCoords[0] >= 125)
     {
       Serial.println("Ship went too much right");
       return;
     }
+    */
     if(MoveHor < 0)
     {
       MoveHor = 0;
@@ -347,6 +409,11 @@ void Game_Move_Yaw_Hor()
       //MoveHor += (Speed / fps);
       MoveHor += (Speed / (1000 / LoopTime));
       MoveHorInt = int(MoveHor);
+      if((Player.BottomRightCoords[0] + MoveHorInt) >= 127)
+      {
+        Serial.println("Ship went too much right");
+        return;
+      }
       Player.TopLeftCoords[0] += MoveHorInt;
       Player.BottomRightCoords[0] += MoveHorInt;
       MoveHor -= MoveHorInt;
@@ -356,6 +423,11 @@ void Game_Move_Yaw_Hor()
       //MoveHor -= ((Yaw + RollYawDZMin)/(RollYawDZMax - RollYawDZMin)) * (Speed / fps);
       MoveHor -= ((Yaw + RollYawDZMin)/(RollYawDZMax - RollYawDZMin)) * (Speed / (1000 / LoopTime));
       MoveHorInt = int(MoveHor);
+      if((Player.BottomRightCoords[0] + MoveHorInt) >= 127)
+      {
+        Serial.println("Ship went too much right");
+        return;
+      }
       Player.TopLeftCoords[0] += MoveHorInt;
       Player.BottomRightCoords[0] += MoveHorInt;
       MoveHor -= MoveHorInt;
