@@ -52,7 +52,7 @@ void Help_Screen()
 void Settings_Screen()
 {
   u8g2.clearBuffer();
-  char fpsToDraw[9];
+  char fpsToDraw[10];
   sprintf(fpsToDraw, "FPS  %i", fps);
   u8g2.drawStr(32, 8, fpsToDraw);
   u8g2.drawStr(32, 24, "Controls");

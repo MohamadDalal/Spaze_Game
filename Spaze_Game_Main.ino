@@ -28,13 +28,13 @@ Right Button    GPIO33
 U8G2_SH1106_128X64_NONAME_F_4W_HW_SPI   u8g2  (U8G2_R0, 5, 16, 17);     // Initialize screen
 GY521 Gyroscope(0x68);                                                  // Initialize Gyroscope
 
-//int fpsValueLen = 28;     // Used for testing many fps values with the one under it too
+//int fpsValueLen = 28;                                   // Used for testing many fps values with the one under it too
 //int fpsValues[] = {60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 230, 240, 300, 360, 420, 480, 10, 20, 30, 40, 50};
-int fpsValueLen = 4;                              // Length of fps array. Used for cycling in the menu option
-int fpsValues[] = {60, 120, 144, 240};            // Fps values to cycle between. This is the one being displayed currently
-int fpsDisplayValues[] = {60, 120, 144, 240};     // Real fps values to display, after program delay is taken into account. Will be used when fps is finalized
-int fpsValueNum = 0;                              // Decides which element of the array the fps value will take. Changable in Settings
-int fps = fpsValues[fpsValueNum];                 // The Fps to run with. It is actually just extra delay in the loop
+int fpsValueLen = 5;                                    // Length of fps array. Used for cycling in the menu option
+int fpsValues[] = {60, 120, 144, 240, 2000};            // Fps values to cycle between. This is the one being displayed currently
+int fpsDisplayValues[] = {60, 120, 144, 240, 2000};     // Real fps values to display, after program delay is taken into account. Will be used when fps is finalized
+int fpsValueNum = 0;                                    // Decides which element of the array the fps value will take. Changable in Settings
+int fps = fpsValues[fpsValueNum];                       // The Fps to run with. It is actually just extra delay in the loop
 
 /*----------------------------------------------------------------------------------
 Notes for fps:
@@ -50,18 +50,19 @@ int Menu = 0;               // Menu 0 is main menu, menu 1 is game menu, menu 2 
 //int MainMenu = 0;         // Menu 0 is the starting menu
 //int ErrorMenu = 0;        // Menu 0 is an error with no error, menu 1 is no gyroscope error.
 int SubMenu = 0;            // SubMenu for the Menues, it all depends on the Main Menu value
-/*--------------------------------Sub Menus--------------------------------
-       Menu 0                       Menu 2
-SubMenu 0: Starting Menu      SubMenu 0: No Error Menu
-SubMenu 1: Controll Menu      SubMenu 1: No Gyro Menu
-SubMenu 2: Highscores Menu    SubMenu 2: Nothing Yet
+/*--------------------------------Sub Menus------------------------------------------------------
+      Menu 0                        Menu 1                      Menu 2
+SubMenu 0: Starting Menu      Submenu 0: Game Menu        SubMenu 0: No Error Menu
+SubMenu 1: Settings Menu      Submenu 1: Pause Menu       SubMenu 1: No Gyro Menu
+SubMenu 2: Help Menu          
+SubMenu 3: Controlls Menu
 
 Suggestion to make the submenus all have different numbers, so you don't get accidental errors
--------------------------------------------------------------------------*/
+-----------------------------------------------------------------------------------------------*/
 bool SlowCalRun = false;    // If this is true, then the program runs the slow calibration process
 int SlowCalTime = 0;        // Might be used to display a counter when the slow cal process is working (Will need to redesign how that thing works, if I want to implement this)
 int MenuCursor = 0;         // Used to show which thing the cursor is pointing at
-int UseYaw = 0;
+int UseYaw = 0;             // This setting decides if the horizontal movement will use Yaw or Roll angles
 int LastMenu = 0;           // Used to know which menu the program has been run from, in case it needs to return to that menu
 int LastSubMenu = 0;        // Used to know which sub menu the program has been run from, in case it needs to return to that sub menu
 
@@ -115,10 +116,10 @@ void setup()
 
 void loop() 
 {
-//----------------------For testing fps------------------
+//----------------------Live FPS Counter-----------------
   LoopTime = millis() - LastLoopTime;       // Set up LoopTime
-  //Serial.print("LoopTime");
-  //Serial.println(LoopTime);
+  Serial.print("LoopTime");
+  Serial.println(LoopTime);
   LastLoopTime = millis();                  // Record time, to use in the next LoopTime setup
 //-------------------------------------------------------
   
@@ -217,6 +218,7 @@ void loop()
       if(LB_Press())                            // If the left button was pressed (Return)
       {
         SubMenu = 0;                            // Return the sub menu to the main menu values
+        MenuCursor = 1;                         // Reset cursor position
         //delay(100);
         delay(1000/fps);                        // Run the fps delay
         return;                                 // Return from the start of the main loop
@@ -266,6 +268,7 @@ void loop()
       if(LB_Press())                            // If the left button was pressed (Return)
       {
         SubMenu = 0;                              // Go to the main menu
+        MenuCursor = 2;                           // Reset cursor position
         //delay(100);
         delay(1000/fps);                          // Run the fps delay
         return;                                   // Return to the main loop
@@ -281,6 +284,7 @@ void loop()
       delay(1000/fps);
       return;
     }
+    delay(1000/fps);                          // Run the fps delay
   }
   else if(Menu == 1)                        // If the Ingame Menues
   {

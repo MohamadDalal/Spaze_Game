@@ -86,7 +86,8 @@ bool RB_Press()
 bool Pause_Game()
 {
   Gyro_Read();                                  // Read the data from the gyroscope
-  if(ax > 1.5 or ay > 1.5 or az >1.5)           // Is there an acceleration stronger than 1.5g?
+  if(az >1.5)
+  //if(ax > 1.5 or ay > 1.5 or az >1.5)           // Is there an acceleration stronger than 1.5g?
   {
     return true;                                // If yes return true
   }
@@ -124,7 +125,8 @@ void Game_Move_Vert()
     {
       //Serial.print("MoveVert before calcualtions is: ");
       //Serial.println(MoveVert);
-      MoveVert += (Speed / fps);
+      //MoveVert += (Speed / fps);
+      MoveVert += (Speed / (1000 / LoopTime));
       MoveVertInt = MoveVert;
       //Serial.print("MoveVert after calcualtions 1 is: ");
       //Serial.println(MoveVert);
@@ -140,7 +142,8 @@ void Game_Move_Vert()
     {
       //Serial.print("MoveVert before calcualtions is: ");
       //Serial.println(MoveVert);
-      MoveVert += ((Pitch - PitchDZMin)/(PitchDZMax - PitchDZMin)) * (Speed / fps);
+      //MoveVert += ((Pitch - PitchDZMin)/(PitchDZMax - PitchDZMin)) * (Speed / fps);
+      MoveVert += ((Pitch - PitchDZMin)/(PitchDZMax - PitchDZMin)) * (Speed / (1000 / LoopTime));
       MoveVertInt = MoveVert;
       //Serial.print("MoveVert after calcualtions 1 is: ");
       //Serial.println(MoveVert);
@@ -171,7 +174,8 @@ void Game_Move_Vert()
     {
       //Serial.print("MoveVert before calcualtions is: ");
       //Serial.println(MoveVert);
-      MoveVert -= (Speed / fps);
+      //MoveVert -= (Speed / fps);
+      MoveVert -= (Speed / (1000 / LoopTime));
       MoveVertInt = MoveVert;
       //Serial.print("MoveVert after calcualtions 1 is: ");
       //Serial.println(MoveVert);
@@ -187,7 +191,8 @@ void Game_Move_Vert()
     {
       //Serial.print("MoveVert before calcualtions is: ");
       //Serial.println(MoveVert);
-      MoveVert += ((Pitch + PitchDZMin)/(PitchDZMax - PitchDZMin)) * (Speed / fps);
+      //MoveVert += ((Pitch + PitchDZMin)/(PitchDZMax - PitchDZMin)) * (Speed / fps);
+      MoveVert += ((Pitch + PitchDZMin)/(PitchDZMax - PitchDZMin)) * (Speed / (1000 / LoopTime));
       MoveVertInt = MoveVert;
       //Serial.print("MoveVert after calcualtions 1 is: ");
       //Serial.println(MoveVert);
@@ -228,7 +233,8 @@ void Game_Move_Roll_Hor()
     }
     if(Roll > RollYawDZMax)
     {
-      MoveHor -= (Speed / fps);
+      //MoveHor -= (Speed / fps);
+      MoveHor -= (Speed / (1000 / LoopTime));
       MoveHorInt = int(MoveHor);
       Player.TopLeftCoords[0] += MoveHorInt;
       Player.BottomRightCoords[0] += MoveHorInt;
@@ -236,7 +242,8 @@ void Game_Move_Roll_Hor()
     }
     else
     {
-      MoveHor -= ((Roll - RollYawDZMin)/(RollYawDZMax - RollYawDZMin)) * (Speed / fps);
+      //MoveHor -= ((Roll - RollYawDZMin)/(RollYawDZMax - RollYawDZMin)) * (Speed / fps);
+      MoveHor -= ((Roll - RollYawDZMin)/(RollYawDZMax - RollYawDZMin)) * (Speed / (1000 / LoopTime));
       MoveHorInt = int(MoveHor);
       Player.TopLeftCoords[0] += MoveHorInt;
       Player.BottomRightCoords[0] += MoveHorInt;
@@ -259,7 +266,8 @@ void Game_Move_Roll_Hor()
     }
     if(Roll < -RollYawDZMax)
     {
-      MoveHor += (Speed / fps);
+      //MoveHor += (Speed / fps);
+      MoveHor += (Speed / (1000 / LoopTime));
       MoveHorInt = int(MoveHor);
       Player.TopLeftCoords[0] += MoveHorInt;
       Player.BottomRightCoords[0] += MoveHorInt;
@@ -267,7 +275,8 @@ void Game_Move_Roll_Hor()
     }
     else
     {
-      MoveHor -= ((Roll + RollYawDZMin)/(RollYawDZMax - RollYawDZMin)) * (Speed / fps);
+      //MoveHor -= ((Roll + RollYawDZMin)/(RollYawDZMax - RollYawDZMin)) * (Speed / fps);
+      MoveHor -= ((Roll + RollYawDZMin)/(RollYawDZMax - RollYawDZMin)) * (Speed / (1000 / LoopTime));
       MoveHorInt = int(MoveHor);
       Player.TopLeftCoords[0] += MoveHorInt;
       Player.BottomRightCoords[0] += MoveHorInt;
@@ -301,7 +310,8 @@ void Game_Move_Yaw_Hor()
     }
     if(Yaw > RollYawDZMax)                                      // If the Yaw angle is higher than the max deadzone
     {
-      MoveHor -= (Speed / fps);                                 // Full speed to the left (No angle ratio calculation)
+      //MoveHor -= (Speed / fps);                                 // Full speed to the left (No angle ratio calculation)
+      MoveHor -= (Speed / (1000 / LoopTime));
       MoveHorInt = int(MoveHor);                                // Make an integer, because pixles move in integers (If the moving thing is more than 1 then round down the value, else no moevement (Value is 0))
       Player.TopLeftCoords[0] += MoveHorInt;                    // Move the value of the top left pixle (This is the one used in the draw function)
       Player.BottomRightCoords[0] += MoveHorInt;                // Move the value of the bottom right pixle (This is the one used in the edge detection)
@@ -309,7 +319,8 @@ void Game_Move_Yaw_Hor()
     }
     else                                                        // If it is between the two deadzones
     {
-      MoveHor -= ((Yaw - RollYawDZMin)/(RollYawDZMax - RollYawDZMin)) * (Speed / fps);    // Make a linear ration from the angle and mutiply it with the speed
+      //MoveHor -= ((Yaw - RollYawDZMin)/(RollYawDZMax - RollYawDZMin)) * (Speed / fps);    // Make a linear ration from the angle and mutiply it with the speed
+      MoveHor -= ((Yaw - RollYawDZMin)/(RollYawDZMax - RollYawDZMin)) * (Speed / (1000 / LoopTime));
       // This is literally the same lines as above, just read the comments above
       MoveHorInt = int(MoveHor);
       Player.TopLeftCoords[0] += MoveHorInt;
@@ -333,7 +344,8 @@ void Game_Move_Yaw_Hor()
     }
     if(Yaw < -RollYawDZMax)
     {
-      MoveHor += (Speed / fps);
+      //MoveHor += (Speed / fps);
+      MoveHor += (Speed / (1000 / LoopTime));
       MoveHorInt = int(MoveHor);
       Player.TopLeftCoords[0] += MoveHorInt;
       Player.BottomRightCoords[0] += MoveHorInt;
@@ -341,7 +353,8 @@ void Game_Move_Yaw_Hor()
     }
     else
     {
-      MoveHor -= ((Yaw + RollYawDZMin)/(RollYawDZMax - RollYawDZMin)) * (Speed / fps);
+      //MoveHor -= ((Yaw + RollYawDZMin)/(RollYawDZMax - RollYawDZMin)) * (Speed / fps);
+      MoveHor -= ((Yaw + RollYawDZMin)/(RollYawDZMax - RollYawDZMin)) * (Speed / (1000 / LoopTime));
       MoveHorInt = int(MoveHor);
       Player.TopLeftCoords[0] += MoveHorInt;
       Player.BottomRightCoords[0] += MoveHorInt;
