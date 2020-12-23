@@ -46,15 +46,15 @@ bool LB_Press()
     Serial.println("LB Millis effect");
     return false;
   }
-  //Serial.print("GPIO32 is");
-  //Serial.println(digitalRead(32));
-  if (digitalRead(32) == 1)                     // Is the button pressed (GPIO 32 is high)
+  //Serial.print("GPIO34 is");
+  //Serial.println(digitalRead(34));
+  if (digitalRead(34) == 0)                     // Is the button pressed (GPIO 34 is LOW)
   {
     Serial.println("LB Pressed");
     LBLastRan = millis();                       // Set the last time this function has run for the millis chack
     return true;                                // Return a true
   }
-  else                                          // If it is not pressed (GPIO 32 is low)
+  else                                          // If it is not pressed (GPIO 34 is HIGH)
   {
     return false;                               // Return False
   }
@@ -68,13 +68,13 @@ bool RB_Press()
     Serial.println("RB Millis effect");
     return false;
   }
-  if (digitalRead(33) == 1)                     // Is the button pressed (GPIO 33 is high)
+  if (digitalRead(35) == 0)                     // Is the button pressed (GPIO 35 is LOW)
   {
     Serial.println("RB Pressed");
     RBLastRan = millis();                       // Set the last time this function has run for the millis chack
     return true;                                // Return a true
   }
-  else                                          // If it is not pressed (GPIO 33 is low)
+  else                                          // If it is not pressed (GPIO 35 is HIGH)
   {
     return false;                               // Return a false
   }

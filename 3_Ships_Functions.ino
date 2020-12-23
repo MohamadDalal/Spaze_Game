@@ -51,6 +51,7 @@ void ShipSetup()
 // Draws a ship with max 3 bitmaps
 void DrawShipXBM(struct Ship obj)
 {
+  u8g2.setDrawColor(2);               // Set the color so that the ship is white on black background and black on white backgrounds
   switch(obj.BitmapNum)
   {
     //drawXBM args: x position, y position, width, height, bitmap array
@@ -75,4 +76,5 @@ void DrawShipXBM(struct Ship obj)
     default:
       Serial.println("Dahek is dis?");
   }
+  u8g2.setDrawColor(1);               // Set the color back to only black
 }

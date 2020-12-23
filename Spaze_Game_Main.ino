@@ -69,22 +69,22 @@ int LastSubMenu = 0;        // Used to know which sub menu the program has been 
 struct Ship
 {
   //-----------------------------Inner Data----------------------------------//
-  int Type;         //0 for player and 1 for enemy and 2 for asteroid
-  int Speed;        //Speed in pixles per second
-  int Health;       //Health points
+  int Type;                   // 0 for player and 1 for enemy and 2 for asteroid
+  int Speed;                  // Speed in pixles per second
+  int Health;                 // Health points
   
   //------------------------------Visual Data--------------------------------//
-  int TopLeftCoords[2]; //Coordinates of top left pixel first is x then is y
-  int BottomRightCoords[2]; // Coordinates of the bottom right pixle, first is x then is y. This is taken to know how high and wide the ship is
-  int BitmapNum;    //Amount of bitmaps to be used. sprite might be split in different parts. Currently capped at 3
-  //int HitboxNum;    //Number of hitboxes // Decided to tie hitboxes to bitmaps, will be added if needed
-  int BitmapData1[4]; // [x position relative to TopLeftCoords, y position relative to TopLeftCoords, Width, Height]
-  int BitmapData2[4]; // [x position relative to TopLeftCoords, y position relative to TopLeftCoords, Width, Height]
-  int BitmapData3[4]; // [x position relative to TopLeftCoords, y position relative to TopLeftCoords, Width, Height]
+  int TopLeftCoords[2];       // Coordinates of top left pixel first is x then is y
+  int BottomRightCoords[2];   // Coordinates of the bottom right pixle, first is x then is y. This is taken to know how high and wide the ship is
+  int BitmapNum;              // Amount of bitmaps to be used. sprite might be split in different parts. Currently capped at 3
+  //int HitboxNum;            // Number of hitboxes // Decided to tie hitboxes to bitmaps, will be added if needed
+  int BitmapData1[4];         // [x position relative to TopLeftCoords, y position relative to TopLeftCoords, Width, Height]
+  int BitmapData2[4];         // [x position relative to TopLeftCoords, y position relative to TopLeftCoords, Width, Height]
+  int BitmapData3[4];         // [x position relative to TopLeftCoords, y position relative to TopLeftCoords, Width, Height]
   // Bitmap pointers will be assigned using a function. All bitmaps will be stored in one place.
-  unsigned char *PntBitmap1;  //Pointer to first bitmap
-  unsigned char *PntBitmap2;  //Pointer to second bitmap
-  unsigned char *PntBitmap3;  //Pointer to third bitmap
+  unsigned char *PntBitmap1;  // Pointer to first bitmap
+  unsigned char *PntBitmap2;  // Pointer to second bitmap
+  unsigned char *PntBitmap3;  // Pointer to third bitmap
 };
 //--------------------------------------------------Initializing structs--------------------------------------------
 struct Ship Player;
@@ -100,11 +100,12 @@ void setup()
   Wire.begin();                             // Begin wire library
   u8g2.begin();                             // Start screen
   u8g2.setFont(u8g2_font_ncenB08_tr);       // Choose font
+  u8g2.setBitmapMode(1);                    // Bitmaps go over each other
   //printf("1-Menu is %i \n", Menu);
   //printf("1-SubMenu is %i \n", SubMenu);
   Gyro_Init();                              // Run function to start Gyroscope
-  pinMode(32, INPUT);                       // Set pin for the left button
-  pinMode(33, INPUT);                       // Set pin for the right button
+  pinMode(34, INPUT);                       // Set pin for the left button
+  pinMode(35, INPUT);                       // Set pin for the right button
   ShipSetup();                              // Setup all the ships
   //ShipDataDump(Player);
   //Serial.println("Setup ran 1");
