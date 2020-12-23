@@ -33,6 +33,13 @@ void Slow_Cal_Screen()
   u8g2.sendBuffer();
 }
 
+void Game_HUD()
+{
+  // The left side has 12 pixles to write numbers vertically in, so a vertical line will be drawn at 12 to seperate them
+  // The right side will either have 6 or 8 pixels of space, so a verical line will be drawn at either 121 or 119
+  return;
+}
+
 // The actual game displaying function. If I acutally make a proper game this will become biggus
 void Game_Screen()
 {
@@ -68,7 +75,7 @@ void Settings_Screen()
 {
   u8g2.clearBuffer();
   char fpsToDraw[10];
-  sprintf(fpsToDraw, "FPS  %i", fps);
+  sprintf(fpsToDraw, "FPS  %i", fpsMax);
   u8g2.drawStr(32, 8, fpsToDraw);
   u8g2.drawStr(32, 24, "Controls");
   u8g2.drawStr(32, 40, "Something");

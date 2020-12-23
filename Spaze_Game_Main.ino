@@ -34,7 +34,9 @@ int fpsValueLen = 5;                                    // Length of fps array. 
 int fpsValues[] = {60, 120, 144, 240, 2000};            // Fps values to cycle between. This is the one being displayed currently
 int fpsDisplayValues[] = {60, 120, 144, 240, 2000};     // Real fps values to display, after program delay is taken into account. Will be used when fps is finalized
 int fpsValueNum = 0;                                    // Decides which element of the array the fps value will take. Changable in Settings
-int fps = fpsValues[fpsValueNum];                       // The Fps to run with. It is actually just extra delay in the loop
+int fpsMax = fpsValues[fpsValueNum];                       // The Fps to run with. It is actually just extra delay in the loop
+int fpsDelay = 0;
+int LastfpsDelay = 0;
 
 /*----------------------------------------------------------------------------------
 Notes for fps:
@@ -66,33 +68,6 @@ int UseYaw = 0;             // This setting decides if the horizontal movement w
 int LastMenu = 0;           // Used to know which menu the program has been run from, in case it needs to return to that menu
 int LastSubMenu = 0;        // Used to know which sub menu the program has been run from, in case it needs to return to that sub menu
 
-struct Ship
-{
-  //-----------------------------Inner Data----------------------------------//
-  int Type;                   // 0 for player and 1 for enemy and 2 for asteroid
-  int Speed;                  // Speed in pixles per second
-  int Health;                 // Health points
-  
-  //------------------------------Visual Data--------------------------------//
-  int TopLeftCoords[2];       // Coordinates of top left pixel first is x then is y
-  int BottomRightCoords[2];   // Coordinates of the bottom right pixle, first is x then is y. This is taken to know how high and wide the ship is
-  int BitmapNum;              // Amount of bitmaps to be used. sprite might be split in different parts. Currently capped at 3
-  //int HitboxNum;            // Number of hitboxes // Decided to tie hitboxes to bitmaps, will be added if needed
-  int BitmapData1[4];         // [x position relative to TopLeftCoords, y position relative to TopLeftCoords, Width, Height]
-  int BitmapData2[4];         // [x position relative to TopLeftCoords, y position relative to TopLeftCoords, Width, Height]
-  int BitmapData3[4];         // [x position relative to TopLeftCoords, y position relative to TopLeftCoords, Width, Height]
-  // Bitmap pointers will be assigned using a function. All bitmaps will be stored in one place.
-  unsigned char *PntBitmap1;  // Pointer to first bitmap
-  unsigned char *PntBitmap2;  // Pointer to second bitmap
-  unsigned char *PntBitmap3;  // Pointer to third bitmap
-};
-//--------------------------------------------------Initializing structs--------------------------------------------
-struct Ship Player;
-struct Ship Enemy[3];
-//CreateShip(/*obj*/Player,/*Type*/ 0,/*spd*/ 10,/*HP*/ 5,/*LUx*/ 26,/*LUy*/ 32,/*BMNo*/ 2,/*BMA1*/ 1,/*BMA2*/ 2,/*BMA3*/ 0,/*BMx1*/ 0,/*BMy1*/ 0,/*BMx2*/ 2,/*BMy2*/ 1,/*BMx3*/ 0,/*BMy3*/ 0);
-//Does not like running functions in global area
-//----------------------------------------------------------------------------------------------------------------
-
 
 void setup()
 {
@@ -107,7 +82,7 @@ void setup()
   pinMode(34, INPUT);                       // Set pin for the left button
   pinMode(35, INPUT);                       // Set pin for the right button
   ShipSetup();                              // Setup all the ships
-  //ShipDataDump(Player);
+  //ShipDataDump(Player);                     // This is unusuable after I have returned the ship struct to its rightfull place. Will find another way to use this later
   //Serial.println("Setup ran 1");
   SlowCalRun = true;                        // Let the slow calibrator run at the start of the program
   Serial.println("Setup ran fully");
@@ -117,11 +92,25 @@ void setup()
 
 void loop() 
 {
-//----------------------Live FPS Counter-----------------
+//----------------------FPS Stuff------------------------
   LoopTime = millis() - LastLoopTime;       // Set up LoopTime
-  Serial.print("LoopTime");
+  Serial.print("LoopTime ");
   Serial.println(LoopTime);
+  Serial.print ("FPS ");
+  Serial.println(1000 / LoopTime);
   LastLoopTime = millis();                  // Record time, to use in the next LoopTime setup
+  fpsDelay = LastfpsDelay + ((1000 / fpsMax) - LoopTime);
+  Serial.print ("FPS Delay ");
+  Serial.println(fpsDelay);
+  if (fpsDelay < 0)
+  {
+    fpsDelay = 0;
+    LastfpsDelay = 0;
+  }
+  else
+  {
+    LastfpsDelay = fpsDelay;
+  }
 //-------------------------------------------------------
   
   if(not Gyroscope.isConnected())           // Check if the Gyroscope is connected
@@ -175,7 +164,7 @@ void loop()
             
             Gyro_Fast_Cal();                          // Run the fast calibrator
             //delay(100);
-            delay(1000/fps);                          // Run the fps delay
+            delay(fpsDelay);                          // Run the fps delay
             return;                                   // Go to the start of the main loop
           case 1:                                   // Settings
             //Serial.println("RB_Pressed case 1");
@@ -185,7 +174,7 @@ void loop()
             MenuCursor = 0;
             
             //delay(100);
-            delay(1000/fps);                          // Run the fps delay
+            delay(fpsDelay);                          // Run the fps delay
             return;                                   // Go to the start of the main loop
           case 2:                                   // Help
             //Serial.println("RB_Pressed case 2");
@@ -195,7 +184,7 @@ void loop()
             MenuCursor = 0;
             
             //delay(100);
-            delay(1000/fps);                          // Run the fps delay
+            delay(fpsDelay);                          // Run the fps delay
             return;                                   // Go to the start of the main loop
           default:                                  // In case the cursor is in a place it is not supposed to be in
             // Set the menu to the unknown error menu and reset the cursor
@@ -205,7 +194,7 @@ void loop()
             
             Serial.println("Cursor in a weird position in the main menu"); // Print an error message in the Serial
             //delay(100);
-            delay(1000/fps);                          // Run the fps delay
+            delay(fpsDelay);                          // Run the fps delay
             return;                                   // return to the start of the main loop
         }
       }
@@ -221,7 +210,7 @@ void loop()
         SubMenu = 0;                            // Return the sub menu to the main menu values
         MenuCursor = 1;                         // Reset cursor position
         //delay(100);
-        delay(1000/fps);                        // Run the fps delay
+        delay(fpsDelay);                        // Run the fps delay
         return;                                 // Return from the start of the main loop
       }
       else if(RB_Press())                       // If the right button was pressed (Select)
@@ -233,22 +222,22 @@ void loop()
             //Serial.println("RB_Pressed settings case 0");
             // Change the fps value
             fpsValueNum = (fpsValueNum + 1) % fpsValueLen;
-            fps = fpsValues[fpsValueNum];
+            fpsMax = fpsValues[fpsValueNum];
             
             //delay(100);
-            delay(1000/fps);                          // Run the fps delay
+            delay(fpsDelay);                          // Run the fps delay
             return;                                   // Return to the start of the main loop
           case 1:                                   // Controls
             //Serial.println("RB_Pressed settings case 1");
             // Not yet made
             //delay(100);
-            delay(1000/fps);
+            delay(fpsDelay);
             return;
           case 2:                                   // Something
             //Serial.println("RB_Pressed settings case 2");
             // No plans for this yet
             //delay(100);
-            delay(1000/fps);
+            delay(fpsDelay);
             return;
           default:                                  // In case the cursor is in a place it is not supposed to be in
             // Set the menu to the unknown error menu and reset the cursor
@@ -256,7 +245,7 @@ void loop()
             SubMenu = 0;
             MenuCursor = 0;
             //delay(100);
-            delay(1000/fps);                          // Run the fps delay
+            delay(fpsDelay);                          // Run the fps delay
             return;                                   // Return to the main loop
         }
       }
@@ -271,7 +260,7 @@ void loop()
         SubMenu = 0;                              // Go to the main menu
         MenuCursor = 2;                           // Reset cursor position
         //delay(100);
-        delay(1000/fps);                          // Run the fps delay
+        delay(fpsDelay);                          // Run the fps delay
         return;                                   // Return to the main loop
       }
       // No right button yet
@@ -282,10 +271,10 @@ void loop()
       Menu = 2;
       SubMenu = 0;
       //delay(100);
-      delay(1000/fps);
+      delay(fpsDelay);
       return;
     }
-    delay(1000/fps);                          // Run the fps delay
+    delay(fpsDelay);                          // Run the fps delay
   }
   else if(Menu == 1)                        // If the Ingame Menues
   {
@@ -304,7 +293,7 @@ void loop()
       
       ShipSetup();                                // Reset the sprites position
       //delay(100);
-      delay(1000/fps);
+      delay(fpsDelay);
       return;
     }
     if(UseYaw)                                  // Check if you are supposed to use Yaw (Steering wheel mode) for horizontal movement
@@ -330,7 +319,7 @@ void loop()
       UseYaw = (UseYaw + 1) % 2;                  // Switch to Yaw mode (This is not the final action. This button had nothing to do so this was added to it. Horizontal controlls will be changed in the settings at the end)
     }
     //delay(100);
-    delay(1000/fps);                            // Run the fps delay
+    delay(fpsDelay);                            // Run the fps delay
   }
   else if(Menu == 2)                          // Error menues
   {
@@ -338,13 +327,13 @@ void loop()
     {
       Unknown_Error_Screen();                     // Display the unknown error screen. Only way to exit it is to restart the program
       //delay(100);
-      delay(1000/fps);                            // Run the fps delay
+      delay(fpsDelay);                            // Run the fps delay
     }
     if(SubMenu == 1)                            // Gyro error screen is stuck in a while loop until the gyro is reconnected
     {
       Gyro_Error_Screen();                        // Display the gyro error screen (The loop is inside)
       //delay(100);
-      delay(1000/fps);                            // Run the fps delay
+      delay(fpsDelay);                            // Run the fps delay
     }
   }
 }

@@ -1,3 +1,32 @@
+struct Ship
+{
+  //-----------------------------Inner Data----------------------------------//
+  int Type;                   // 0 for player and 1 for enemy and 2 for asteroid
+  int Speed;                  // Speed in pixles per second
+  int Health;                 // Health points
+  
+  //------------------------------Visual Data--------------------------------//
+  int TopLeftCoords[2];       // Coordinates of top left pixel first is x then is y
+  int BottomRightCoords[2];   // Coordinates of the bottom right pixle, first is x then is y. This is taken to know how high and wide the ship is
+  int BitmapNum;              // Amount of bitmaps to be used. sprite might be split in different parts. Currently capped at 3
+  //int HitboxNum;            // Number of hitboxes // Decided to tie hitboxes to bitmaps, will be added if needed
+  int BitmapData1[4];         // [x position relative to TopLeftCoords, y position relative to TopLeftCoords, Width, Height]
+  int BitmapData2[4];         // [x position relative to TopLeftCoords, y position relative to TopLeftCoords, Width, Height]
+  int BitmapData3[4];         // [x position relative to TopLeftCoords, y position relative to TopLeftCoords, Width, Height]
+  // Bitmap pointers will be assigned using a function. All bitmaps will be stored in one place.
+  unsigned char *PntBitmap1;  // Pointer to first bitmap
+  unsigned char *PntBitmap2;  // Pointer to second bitmap
+  unsigned char *PntBitmap3;  // Pointer to third bitmap
+};
+//--------------------------------------------------Initializing structs--------------------------------------------
+struct Ship Player;
+struct Ship Enemy[3];
+//CreateShip(/*obj*/Player,/*Type*/ 0,/*spd*/ 10,/*HP*/ 5,/*LUx*/ 26,/*LUy*/ 32,/*BMNo*/ 2,/*BMA1*/ 1,/*BMA2*/ 2,/*BMA3*/ 0,/*BMx1*/ 0,/*BMy1*/ 0,/*BMx2*/ 2,/*BMy2*/ 1,/*BMx3*/ 0,/*BMy3*/ 0);
+//Does not like running functions in global area
+//----------------------------------------------------------------------------------------------------------------
+
+
+
 // Fills in the struct (Struct to fill, Type, speed, health, LUx and LUy = Left Upper corner coordinates, BMNo = Number of bitmaps, BMA = BitmapAddress, BMx and BMy = bitmap x and y relative to top left of sprite)
 // If the bitmap is not going to be used, then the address and the coordinates are to be left as 0
 // Use the bitmaps in order, so if only one bitmap is needed, then it has to be the first one
