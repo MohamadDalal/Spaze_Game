@@ -32,7 +32,7 @@ void Menu_Navigation()
       return;
     }
     Serial.println("Up it goes");
-    MenuCursor = (3 - 1 + MenuCursor) % 3;      // Go through the list {0, 1, 2} backwards. I love this function that I came up with. Maybe one day I can prove its generality by induction
+    MenuCursor = (3 - 1 + MenuCursor) % 3;      // Go through the list {0, 1, 2} backwards. I love this function, I was able to prove it by induction in my LiAl notebook.
     MNLastRan = millis();                       // Set the last time this function has run for the millis chack
   }
 }
@@ -46,17 +46,36 @@ bool LB_Press()
     Serial.println("LB Millis effect");
     return false;
   }
-  //Serial.print("GPIO34 is");
-  //Serial.println(digitalRead(34));
-  if (digitalRead(34) == 0)                     // Is the button pressed (GPIO 34 is LOW)
+  if(InvertButtons)
   {
-    Serial.println("LB Pressed");
-    LBLastRan = millis();                       // Set the last time this function has run for the millis chack
-    return true;                                // Return a true
+    //Serial.print("GPIO35 is");
+    //Serial.println(digitalRead(35));
+    //Serial.println("Buttons inverted")
+    if (digitalRead(35) == 0)                     // Is the button pressed (GPIO 35 is LOW)
+    {
+      Serial.println("LB Pressed");
+      LBLastRan = millis();                       // Set the last time this function has run for the millis chack
+      return true;                                // Return a true
+    }
+    else                                          // If it is not pressed (GPIO 35 is HIGH)
+    {
+      return false;                               // Return False
+    }
   }
-  else                                          // If it is not pressed (GPIO 34 is HIGH)
+  else
   {
-    return false;                               // Return False
+    //Serial.print("GPIO34 is");
+    //Serial.println(digitalRead(34));
+    if (digitalRead(34) == 0)                     // Is the button pressed (GPIO 34 is LOW)
+    {
+      Serial.println("LB Pressed");
+      LBLastRan = millis();                       // Set the last time this function has run for the millis chack
+      return true;                                // Return a true
+    }
+    else                                          // If it is not pressed (GPIO 34 is HIGH)
+    {
+      return false;                               // Return False
+    }
   }
 }
 
@@ -68,15 +87,36 @@ bool RB_Press()
     Serial.println("RB Millis effect");
     return false;
   }
-  if (digitalRead(35) == 0)                     // Is the button pressed (GPIO 35 is LOW)
+  if(not InvertButtons)
   {
-    Serial.println("RB Pressed");
-    RBLastRan = millis();                       // Set the last time this function has run for the millis chack
-    return true;                                // Return a true
+    //Serial.print("GPIO35 is");
+    //Serial.println(digitalRead(35));
+    if (digitalRead(35) == 0)                     // Is the button pressed (GPIO 35 is LOW)
+    {
+      Serial.println("RB Pressed");
+      RBLastRan = millis();                       // Set the last time this function has run for the millis chack
+      return true;                                // Return a true
+    }
+    else                                          // If it is not pressed (GPIO 35 is HIGH)
+    {
+      return false;                               // Return False
+    }
   }
-  else                                          // If it is not pressed (GPIO 35 is HIGH)
+  else
   {
-    return false;                               // Return a false
+    //Serial.print("GPIO34 is");
+    //Serial.println(digitalRead(34));
+    //Serial.println("Buttons inverted")
+    if (digitalRead(34) == 0)                     // Is the button pressed (GPIO 34 is LOW)
+    {
+      Serial.println("RB Pressed");
+      RBLastRan = millis();                       // Set the last time this function has run for the millis chack
+      return true;                                // Return a true
+    }
+    else                                          // If it is not pressed (GPIO 34 is HIGH)
+    {
+      return false;                               // Return False
+    }
   }
 }
 
@@ -262,7 +302,7 @@ void Game_Move_Roll_Hor()
       MoveHor -= (Speed / fps);
       //MoveHor -= (Speed / (1000 / LoopTime));
       MoveHorInt = int(MoveHor);
-      if((Player.TopLeftCoords[0] + MoveHorInt) <= 0)
+      if((Player.TopLeftCoords[0] + MoveHorInt) <= 13)
       {
         Serial.println("Ship went too much left ");
         return;
@@ -276,7 +316,7 @@ void Game_Move_Roll_Hor()
       MoveHor -= ((Roll - RollYawDZMin)/(RollYawDZMax - RollYawDZMin)) * (Speed / fps);
       //MoveHor -= ((Roll - RollYawDZMin)/(RollYawDZMax - RollYawDZMin)) * (Speed / (1000 / LoopTime));
       MoveHorInt = int(MoveHor);
-      if((Player.TopLeftCoords[0] + MoveHorInt) <= 0)
+      if((Player.TopLeftCoords[0] + MoveHorInt) <= 13)
       {
         Serial.println("Ship went too much left ");
         return;
@@ -307,7 +347,7 @@ void Game_Move_Roll_Hor()
       MoveHor += (Speed / fps);
       //MoveHor += (Speed / (1000 / LoopTime));
       MoveHorInt = int(MoveHor);
-      if((Player.BottomRightCoords[0] + MoveHorInt) >= 127)
+      if((Player.BottomRightCoords[0] + MoveHorInt) >= 120)
       {
         Serial.println("Ship went too much right");
         return;
@@ -321,7 +361,7 @@ void Game_Move_Roll_Hor()
       MoveHor -= ((Roll + RollYawDZMin)/(RollYawDZMax - RollYawDZMin)) * (Speed / fps);
       //MoveHor -= ((Roll + RollYawDZMin)/(RollYawDZMax - RollYawDZMin)) * (Speed / (1000 / LoopTime));
       MoveHorInt = int(MoveHor);
-      if((Player.BottomRightCoords[0] + MoveHorInt) >= 127)
+      if((Player.BottomRightCoords[0] + MoveHorInt) >= 120)
       {
         Serial.println("Ship went too much right");
         return;
@@ -363,7 +403,7 @@ void Game_Move_Yaw_Hor()
       MoveHor -= (Speed / fps);                                 // Full speed to the left (No angle ratio calculation)
       //MoveHor -= (Speed / (1000 / LoopTime));
       MoveHorInt = int(MoveHor);                                // Make an integer, because pixles move in integers (If the moving thing is more than 1 then round down the value, else no moevement (Value is 0))
-      if((Player.TopLeftCoords[0] + MoveHorInt) <= 0)           // Check if the ship will go out of the screen after moving
+      if((Player.TopLeftCoords[0] + MoveHorInt) <= 13)           // Check if the ship will go out of the screen after moving
       {
         Serial.println("Ship went too much left ");
         return;                                                 // If so then don't move the ship. This is a better method than just preventing movement at the start fo the function, as was done before
@@ -378,7 +418,7 @@ void Game_Move_Yaw_Hor()
       //MoveHor -= ((Yaw - RollYawDZMin)/(RollYawDZMax - RollYawDZMin)) * (Speed / (1000 / LoopTime));
       // This is literally the same lines as above, just read the comments above
       MoveHorInt = int(MoveHor);
-      if((Player.TopLeftCoords[0] + MoveHorInt) <= 0)
+      if((Player.TopLeftCoords[0] + MoveHorInt) <= 13)
       {
         Serial.println("Ship went too much left ");
         return;
@@ -409,7 +449,7 @@ void Game_Move_Yaw_Hor()
       MoveHor += (Speed / fps);
       //MoveHor += (Speed / (1000 / LoopTime));
       MoveHorInt = int(MoveHor);
-      if((Player.BottomRightCoords[0] + MoveHorInt) >= 127)
+      if((Player.BottomRightCoords[0] + MoveHorInt) >= 120)
       {
         Serial.println("Ship went too much right");
         return;
@@ -423,7 +463,7 @@ void Game_Move_Yaw_Hor()
       MoveHor -= ((Yaw + RollYawDZMin)/(RollYawDZMax - RollYawDZMin)) * (Speed / fps);
       //MoveHor -= ((Yaw + RollYawDZMin)/(RollYawDZMax - RollYawDZMin)) * (Speed / (1000 / LoopTime));
       MoveHorInt = int(MoveHor);
-      if((Player.BottomRightCoords[0] + MoveHorInt) >= 127)
+      if((Player.BottomRightCoords[0] + MoveHorInt) >= 120)
       {
         Serial.println("Ship went too much right");
         return;

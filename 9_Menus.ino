@@ -7,18 +7,26 @@ void Main_Menu()
   u8g2.drawStr(32, 42, "Help");
   u8g2.drawStr(8, (MenuCursor * 16 + 10), "-->");
   u8g2.setFont(u8g2_font_p01type_tr);
-  u8g2.drawStr(2, 56, "LB:CALIBRATE");
-  //u8g2.drawStr(108, 26, "TILT");
-  u8g2.drawStr(62, 56, "TILT");
-  u8g2.drawStr(84, 56, "RB:SELECT");
-  u8g2.setFontDirection(1);
-  //u8g2.drawStr(114, 32, "-->");
-  //u8g2.drawStr(114, 2, "<--");
-  //u8g2.drawStr(114, 16, "<");
-  //u8g2.drawStr(114, 29, ">");
-  u8g2.drawStr(68, 46, "<");
-  u8g2.drawStr(68, 59, ">");
-  u8g2.setFontDirection(0);
+  if(InvertButtons)
+  {
+    u8g2.drawStr(2, 56, "LB:SELECT");
+    u8g2.drawStr(50, 56, "TILT");
+    u8g2.drawStr(74, 56, "RB:CALIBRATE");
+    u8g2.setFontDirection(1);
+    u8g2.drawStr(56, 46, "<");
+    u8g2.drawStr(56, 59, ">");
+    u8g2.setFontDirection(0);
+  }
+  else
+  {
+    u8g2.drawStr(2, 56, "LB:CALIBRATE");
+    u8g2.drawStr(62, 56, "TILT");
+    u8g2.drawStr(84, 56, "RB:SELECT");
+    u8g2.setFontDirection(1);
+    u8g2.drawStr(68, 46, "<");
+    u8g2.drawStr(68, 59, ">");
+    u8g2.setFontDirection(0);
+  }
   u8g2.setFont(u8g2_font_ncenB08_tr);
   u8g2.sendBuffer();
   //delay(10);
@@ -35,6 +43,20 @@ void Slow_Cal_Screen()
 
 void Game_HUD()
 {
+  u8g2.setFontDirection(3);
+  char StrToDraw[7];
+  sprintf(StrToDraw, "%i", Player.Health);
+  u8g2.drawStr(10, 63, StrToDraw);
+  sprintf(StrToDraw, "%i", (1000 / LoopTime));
+  u8g2.drawStr(10, 10, StrToDraw);
+  sprintf(StrToDraw, "%i:%i", ((GameTime / 60000) % 60), ((GameTime / 1000) % 60));
+  int Width;
+  Width  = u8g2.getStrWidth(StrToDraw);
+  u8g2.drawStr(10, (31 + (Width / 2)), StrToDraw);
+  u8g2.setFontDirection(0);
+  u8g2.drawLine(12, 0, 12, 63);
+  u8g2.drawLine(121, 0, 121, 63);
+  //u8g2.sendBuffer();
   // The left side has 12 pixles to write numbers vertically in, so a vertical line will be drawn at 12 to seperate them
   // The right side will either have 6 or 8 pixels of space, so a verical line will be drawn at either 121 or 119
   return;
@@ -43,10 +65,11 @@ void Game_HUD()
 // The actual game displaying function. If I acutally make a proper game this will become biggus
 void Game_Screen()
 {
-  u8g2.clearBuffer();
+  //u8g2.clearBuffer();
+  Display_Laser();
   DrawShipXBM(Player);
   //u8g2.drawCircle(100, 25, 10, U8G2_DRAW_ALL);
-  u8g2.sendBuffer();
+  //u8g2.sendBuffer();
   //delay(100);
 }
 
@@ -59,13 +82,26 @@ void Help_Screen()
   u8g2.drawStr(32, 40, "PowerUps");
   u8g2.drawStr(8, (MenuCursor * 16 + 8), "-->");
   u8g2.setFont(u8g2_font_p01type_tr);
-  u8g2.drawStr(2, 56, "LB:BACK");
-  u8g2.drawStr(50, 56, "TILT");
-  u8g2.drawStr(84, 56, "RB:SELECT");
-  u8g2.setFontDirection(1);
-  u8g2.drawStr(56, 46, "<");
-  u8g2.drawStr(56, 59, ">");
-  u8g2.setFontDirection(0);
+  if(InvertButtons)
+  {
+    u8g2.drawStr(2, 56, "LB:SELECT");
+    u8g2.drawStr(50, 56, "TILT");
+    u8g2.drawStr(95, 56, "RB:BACK");
+    u8g2.setFontDirection(1);
+    u8g2.drawStr(56, 46, "<");
+    u8g2.drawStr(56, 59, ">");
+    u8g2.setFontDirection(0);
+  }
+  else
+  {
+    u8g2.drawStr(2, 56, "LB:BACK");
+    u8g2.drawStr(50, 56, "TILT");
+    u8g2.drawStr(84, 56, "RB:SELECT");
+    u8g2.setFontDirection(1);
+    u8g2.drawStr(56, 46, "<");
+    u8g2.drawStr(56, 59, ">");
+    u8g2.setFontDirection(0);
+  }
   u8g2.setFont(u8g2_font_ncenB08_tr);
   u8g2.sendBuffer();
 }
@@ -78,16 +114,83 @@ void Settings_Screen()
   sprintf(fpsToDraw, "FPS  %i", fpsMax);
   u8g2.drawStr(32, 8, fpsToDraw);
   u8g2.drawStr(32, 24, "Controls");
-  u8g2.drawStr(32, 40, "Something");
+  u8g2.drawStr(32, 40, "Difficulty  ???");
   u8g2.drawStr(8, (MenuCursor * 16 + 8), "-->");
   u8g2.setFont(u8g2_font_p01type_tr);
-  u8g2.drawStr(2, 56, "LB:BACK");
-  u8g2.drawStr(50, 56, "TILT");
-  u8g2.drawStr(84, 56, "RB:SELECT");
-  u8g2.setFontDirection(1);
-  u8g2.drawStr(56, 46, "<");
-  u8g2.drawStr(56, 59, ">");
-  u8g2.setFontDirection(0);
+  if(InvertButtons)
+  {
+    u8g2.drawStr(2, 56, "LB:SELECT");
+    u8g2.drawStr(50, 56, "TILT");
+    u8g2.drawStr(95, 56, "RB:BACK");
+    u8g2.setFontDirection(1);
+    u8g2.drawStr(56, 46, "<");
+    u8g2.drawStr(56, 59, ">");
+    u8g2.setFontDirection(0);
+  }
+  else
+  {
+    u8g2.drawStr(2, 56, "LB:BACK");
+    u8g2.drawStr(50, 56, "TILT");
+    u8g2.drawStr(84, 56, "RB:SELECT");
+    u8g2.setFontDirection(1);
+    u8g2.drawStr(56, 46, "<");
+    u8g2.drawStr(56, 59, ">");
+    u8g2.setFontDirection(0);
+  }
+  u8g2.setFont(u8g2_font_ncenB08_tr);
+  u8g2.sendBuffer();
+}
+
+void Settings_Controls_Menu()
+{
+  u8g2.clearBuffer();
+  char StrToDraw[20];
+  if(UseYaw)
+  {
+    u8g2.drawStr(32, 8, "Steerwheel  ON");
+  }
+  else
+  {
+    u8g2.drawStr(32, 8, "Steerwheel  OFF");
+  }
+  if(InvertButtons)
+  {
+    u8g2.drawStr(32, 24, "LB<-->RB  ON");
+  }
+  else
+  {
+    u8g2.drawStr(32, 24, "LB<-->RB  OFF");
+  }
+  if(CorruptShip)
+  {
+    u8g2.drawStr(32, 40, "Curropted?  YES");
+  }
+  else
+  {
+    u8g2.drawStr(32, 40, "Corrupted?  NO!");
+  }
+  u8g2.drawStr(8, (MenuCursor * 16 + 8), "-->");
+  u8g2.setFont(u8g2_font_p01type_tr);
+  if(InvertButtons)
+  {
+    u8g2.drawStr(2, 56, "LB:SELECT");
+    u8g2.drawStr(50, 56, "TILT");
+    u8g2.drawStr(95, 56, "RB:BACK");
+    u8g2.setFontDirection(1);
+    u8g2.drawStr(56, 46, "<");
+    u8g2.drawStr(56, 59, ">");
+    u8g2.setFontDirection(0);
+  }
+  else
+  {
+    u8g2.drawStr(2, 56, "LB:BACK");
+    u8g2.drawStr(50, 56, "TILT");
+    u8g2.drawStr(84, 56, "RB:SELECT");
+    u8g2.setFontDirection(1);
+    u8g2.drawStr(56, 46, "<");
+    u8g2.drawStr(56, 59, ">");
+    u8g2.setFontDirection(0);
+  }
   u8g2.setFont(u8g2_font_ncenB08_tr);
   u8g2.sendBuffer();
 }

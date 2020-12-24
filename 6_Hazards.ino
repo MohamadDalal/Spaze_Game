@@ -102,7 +102,7 @@ void Dump_Laser(struct Laser obj)
   Serial.println(obj.AnimationSpeed);
 }
 
-void Display_Lasers()
+void Display_Laser()
 {
   int LeftCoord;
   if(Laser.Active)
@@ -120,11 +120,11 @@ void Display_Lasers()
       if(DrawMark)
       {
         int ExclamationHeight = Laser.TopLeftCoords[1] + (Laser.Height / 2) + 4;
-        u8g2.drawStr(120, ExclamationHeight, "!");
+        u8g2.drawStr(123, ExclamationHeight, "!");
       }
       u8g2.setFont(u8g2_font_ncenB08_tr);       // Choose font
-      u8g2.drawStr(120, (Laser.TopLeftCoords[1] + 4), "-");                    // The - sign in font_ncenB08_tr is flying in the air by 4 pixels (Is 4 pixels heighter than its y position)
-      u8g2.drawStr(120, (Laser.TopLeftCoords[1] + Laser.Height + 4), "-");
+      u8g2.drawStr(123, (Laser.TopLeftCoords[1] + 4), "-");                    // The - sign in font_ncenB08_tr is flying in the air by 4 pixels (Is 4 pixels heighter than its y position)
+      u8g2.drawStr(123, (Laser.TopLeftCoords[1] + Laser.Height + 4), "-");
       return;
     }
     else if (Laser.ActiveTime < (2000 + Laser.LaserSpeed))
@@ -143,7 +143,11 @@ void Display_Lasers()
     int AnimationYCoord = (((Laser.ActiveTime * Laser.AnimationSpeed) / 1000) % (Laser.Height)) + Laser.TopLeftCoords[1] + 1;
     u8g2.drawHLine(Laser.TopLeftCoords[0], AnimationYCoord, Width);
     u8g2.setDrawColor(1);
-    u8g2.sendBuffer();
+    //u8g2.sendBuffer();
+  }
+  else
+  {
+    return;
   }
 }
 

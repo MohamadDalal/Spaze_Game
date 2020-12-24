@@ -46,12 +46,15 @@ Notes for fps:
 
 unsigned long LastLoopTime = 0;     // This is used for testing fps. Records the millis() value of when the loop last ran
 unsigned long LoopTime = 0;         // This is used for testing fps. Shows the time it takes for the loop to finish. Can also detect unwanted delays.
+unsigned long GameTime = 0;
 
 int Menu = 0;               // Menu 0 is main menu, menu 1 is game menu, menu 2 is error menu
 // The two under have been replaced by the SubMenu
 //int MainMenu = 0;         // Menu 0 is the starting menu
 //int ErrorMenu = 0;        // Menu 0 is an error with no error, menu 1 is no gyroscope error.
 int SubMenu = 0;            // SubMenu for the Menues, it all depends on the Main Menu value
+int Page = 0;               // The page of multi paged menues
+int PauseOn = 0;            // Checks if this menu has been accessed from the pause menu and not the main menu (This is on when the game is paused and off when in the main menu)
 /*--------------------------------Sub Menus------------------------------------------------------
       Menu 0                        Menu 1                      Menu 2
 SubMenu 0: Starting Menu      Submenu 0: Game Menu        SubMenu 0: No Error Menu
@@ -64,10 +67,13 @@ Suggestion to make the submenus all have different numbers, so you don't get acc
 bool SlowCalRun = false;    // If this is true, then the program runs the slow calibration process
 int SlowCalTime = 0;        // Might be used to display a counter when the slow cal process is working (Will need to redesign how that thing works, if I want to implement this)
 int MenuCursor = 0;         // Used to show which thing the cursor is pointing at
-int UseYaw = 0;             // This setting decides if the horizontal movement will use Yaw or Roll angles
+bool UseYaw = false;         // This setting decides if the horizontal movement will use Yaw or Roll angles
+bool InvertButtons = false; // Inverts the functions of the LB and the RB. Used in the controls function, where the pin it reads from has been inverted. Also used in the menu display functions to change what is written at the bottom
+bool CorruptShip = false;   // Invert the two ship bitmaps :P
 int LastMenu = 0;           // Used to know which menu the program has been run from, in case it needs to return to that menu
 int LastSubMenu = 0;        // Used to know which sub menu the program has been run from, in case it needs to return to that sub menu
 
+int BigLaser = 0;               // Delete later, only used for testing
 
 void setup()
 {
@@ -81,7 +87,7 @@ void setup()
   Gyro_Init();                              // Run function to start Gyroscope
   pinMode(34, INPUT);                       // Set pin for the left button
   pinMode(35, INPUT);                       // Set pin for the right button
-  ShipSetup();                              // Setup all the ships
+  //ShipSetup();                              // Setup all the ships
   //ShipDataDump(Player);                     // This is unusuable after I have returned the ship struct to its rightfull place. Will find another way to use this later
   //Serial.println("Setup ran 1");
   SlowCalRun = true;                        // Let the slow calibrator run at the start of the program
@@ -161,6 +167,8 @@ void loop()
             Menu = 1;
             SubMenu = 0;
             MenuCursor = 0;
+            ShipSetup();                              // Setup all the ships
+            //GameTime = 0;
             
             Gyro_Fast_Cal();                          // Run the fast calibrator
             //delay(100);
@@ -207,6 +215,7 @@ void loop()
       
       if(LB_Press())                            // If the left button was pressed (Return)
       {
+        Menu = 0;
         SubMenu = 0;                            // Return the sub menu to the main menu values
         MenuCursor = 1;                         // Reset cursor position
         //delay(100);
@@ -229,13 +238,15 @@ void loop()
             return;                                   // Return to the start of the main loop
           case 1:                                   // Controls
             //Serial.println("RB_Pressed settings case 1");
-            // Not yet made
+            Menu = 0;
+            SubMenu = 3;
+            MenuCursor = 0;
             //delay(100);
             delay(fpsDelay);
             return;
-          case 2:                                   // Something
+          case 2:                                   // Difficulty
             //Serial.println("RB_Pressed settings case 2");
-            // No plans for this yet
+            // If I ever have time to implement this, then I will write something here
             //delay(100);
             delay(fpsDelay);
             return;
@@ -257,6 +268,7 @@ void loop()
       Menu_Navigation();                        // Enable menu navigation
       if(LB_Press())                            // If the left button was pressed (Return)
       {
+        Menu = 0;
         SubMenu = 0;                              // Go to the main menu
         MenuCursor = 2;                           // Reset cursor position
         //delay(100);
@@ -264,6 +276,56 @@ void loop()
         return;                                   // Return to the main loop
       }
       // No right button yet
+    }
+    else if(SubMenu == 3)                   // Controls Menu
+    {
+      Settings_Controls_Menu();
+      Menu_Navigation();
+      if(LB_Press())                            // If the left button was pressed (Return)
+      {
+        Menu = 0;
+        SubMenu = 1;                            // Return the sub menu to the Settings value
+        MenuCursor = 1;                         // Reset cursor position
+        //delay(100);
+        delay(fpsDelay);                        // Run the fps delay
+        return;                                 // Return from the start of the main loop
+      }
+      else if(RB_Press())                       // If the right button was pressed (Select)
+      {
+        Serial.println("RB_Pressed in controlls");
+        switch(MenuCursor)                        // Check where the cursor was on
+        {
+          case 0:                                   // Steerwheel mode
+            //Serial.println("RB_Pressed controls case 0");
+            // Change to steerwheel mode (UseYaw)
+            UseYaw = !UseYaw;
+            //delay(100);
+            delay(fpsDelay);                          // Run the fps delay
+            return;                                   // Return to the start of the main loop
+          case 1:                                   // LB<-->RB Invert button functions
+            //Serial.println("RB_Pressed controls case 1");
+            // Invert the functions of the left and right buttons
+            InvertButtons = !InvertButtons;
+            delay(250);
+            delay(fpsDelay);
+            return;
+          case 2:                                   // Corrupted ship mode
+            //Serial.println("RB_Pressed controls case 2");
+            // Corrupt the ship by inverting the two bitmaps
+            CorruptShip = !CorruptShip;
+            //delay(100);
+            delay(fpsDelay);
+            return;
+          default:                                  // In case the cursor is in a place it is not supposed to be in
+            // Set the menu to the unknown error menu and reset the cursor
+            Menu = 2;
+            SubMenu = 0;
+            MenuCursor = 0;
+            //delay(100);
+            delay(fpsDelay);                          // Run the fps delay
+            return;                                   // Return to the main loop
+        }
+      }
     }
     else                                      // If the SubMenu value is a weird value, then show the unknown error menu
     {
@@ -281,7 +343,11 @@ void loop()
     // No sub menues have been implemented yet. A possible sub menu is the pause screen
     
     //Serial.println("Switch 2");
-    Game_Screen();                              // Run the Game displaying function
+    GameTime += LoopTime;
+    u8g2.clearBuffer();
+    Game_HUD();
+    Game_Screen();                              // Run the Game displaying function. ClearBuffer is in here
+    u8g2.sendBuffer();                          // Only one sendBuffer() must be used per loop, as that thing lags like hell. Therefore, the game screen sends after everything was fully drawn
     Game_Move_Vert();                           // Check for vertical movement from the gyroscope
     if(Pause_Game())                            // Check if the pause movement has been triggered
     {
@@ -316,7 +382,13 @@ void loop()
     else if(RB_Press())                         // Check if the right button has been pressed
     {
       Serial.println("RB_Pressed in game");
-      UseYaw = (UseYaw + 1) % 2;                  // Switch to Yaw mode (This is not the final action. This button had nothing to do so this was added to it. Horizontal controlls will be changed in the settings at the end)
+      //UseYaw = !UseYaw;                  // Switch to Yaw mode (This is not the final action. This button had nothing to do so this was added to it. Horizontal controlls will be changed in the settings at the end)
+      //Activate_Laser(0, 32, 16, 4000);
+      BigLaser = (BigLaser + 1) % 2;
+      Serial.print("BigLaser ");
+      Serial.println(BigLaser);
+      Activate_Laser_Random(BigLaser);
+      //Dump_Laser(Laser);
     }
     //delay(100);
     delay(fpsDelay);                            // Run the fps delay

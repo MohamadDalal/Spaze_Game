@@ -1,7 +1,7 @@
 struct Ship
 {
   //-----------------------------Inner Data----------------------------------//
-  int Type;                   // 0 for player and 1 for enemy and 2 for asteroid
+  int Type;                   // 0 for Invincible and 1 for Normal
   int Speed;                  // Speed in pixles per second
   int Health;                 // Health points
   
@@ -20,7 +20,7 @@ struct Ship
 };
 //--------------------------------------------------Initializing structs--------------------------------------------
 struct Ship Player;
-struct Ship Enemy[3];
+//struct Ship Enemy[3];
 //CreateShip(/*obj*/Player,/*Type*/ 0,/*spd*/ 10,/*HP*/ 5,/*LUx*/ 26,/*LUy*/ 32,/*BMNo*/ 2,/*BMA1*/ 1,/*BMA2*/ 2,/*BMA3*/ 0,/*BMx1*/ 0,/*BMy1*/ 0,/*BMx2*/ 2,/*BMy2*/ 1,/*BMx3*/ 0,/*BMy3*/ 0);
 //Does not like running functions in global area
 //----------------------------------------------------------------------------------------------------------------
@@ -74,7 +74,19 @@ void ShipSetup()
 {
   //Serial.println("ShipSetup ran");    //Debug
   //struct Ship Player;                 //Struct had to be initialized in global area, so this failed
-  Player = CreateShip(/*obj*/Player,/*Type*/ 0,/*spd*/ 150,/*HP*/ 5,/*LUx*/ 26,/*LUy*/ 32,/*BMNo*/ 2,/*BMA1*/ 1,/*BMA2*/ 2,/*BMA3*/ 0,/*BMx1*/ 0,/*BMy1*/ 0,/*BMx2*/ 3,/*BMy2*/ 2,/*BMx3*/ 0,/*BMy3*/ 0);
+  int PlayerBMx1;
+  int PlayerBMx2;
+  if(CorruptShip)
+  {
+    PlayerBMx1 = 6;
+    PlayerBMx2 = 0;
+  }
+  else
+  {
+    PlayerBMx1 = 0;
+    PlayerBMx2 = 3;
+  }
+  Player = CreateShip(/*obj*/Player,/*Type*/ 1,/*spd*/ 150,/*HP*/ 5,/*LUx*/ 26,/*LUy*/ 32,/*BMNo*/ 2,/*BMA1*/ 1,/*BMA2*/ 2,/*BMA3*/ 0,/*BMx1*/ PlayerBMx1,/*BMy1*/ 0,/*BMx2*/ PlayerBMx2,/*BMy2*/ 2,/*BMx3*/ 0,/*BMy3*/ 0);
 }
 
 // Draws a ship with max 3 bitmaps
@@ -104,6 +116,8 @@ void DrawShipXBM(struct Ship obj)
       break;
     default:
       Serial.println("Dahek is dis?");
+      Menu = 2;
+      SubMenu = 0;
   }
   u8g2.setDrawColor(1);               // Set the color back to only black
 }
