@@ -8,7 +8,7 @@ struct Laser
   // Width is Right edge - Left coordinate
   int Height = 0;                             // Height of the laser, can be between 16 and 30. Laser 2 height is (16 <= Height <= 46 - Lasers[1].Height)
   int Duration = 0;                           // Duration it is active in milliseconds
-  unsigned long StartTime = 0;                // Start time in millis{}
+  //unsigned long StartTime = 0;                // Start time in millis{}. Not Needed anymore
   unsigned long ActiveTime = 0;               // Store a millis value here to compare with Duration
   int AnimationSpeed = 50;                    // Speed in which animation works in milliseconds
   int LaserSpeed = 500;                      // Time the laser takes to cover the entir screen in milliseconds
@@ -35,7 +35,8 @@ void Activate_Laser(int Height, int StartPos, int Duration)
     Laser.TopLeftCoords[1] = StartPos;
     Laser.Height = Height;
     Laser.Duration = Duration;
-    Laser.StartTime = millis();
+    //Laser.StartTime = millis();
+    Laser.ActiveTime = 0;
   }
 }
 
@@ -46,7 +47,7 @@ void Deactivate_Laser(int Num)
   Laser.TopLeftCoords[1] = 0;
   Laser.Height = 0;
   Laser.Duration = 0;
-  Laser.StartTime = 0;
+  //Laser.StartTime = 0;
   Laser.ActiveTime = 0;
 }
 
@@ -65,7 +66,8 @@ void Activate_Laser_Random(int Size)
         Laser.Height = random(16, 33);
         Laser.TopLeftCoords[1] = random(0, (64 - Laser.Height));
         Laser.Duration = (random(2, 9)) * 1000;
-        Laser.StartTime = millis();
+        //Laser.StartTime = millis();
+        Laser.ActiveTime = 0;
         return;
       case 1:
         Laser.Active = 1;
@@ -74,7 +76,8 @@ void Activate_Laser_Random(int Size)
         High = random(0, 2);
         Laser.TopLeftCoords[1] = High * (63- Laser.Height);
         Laser.Duration = (random(2, 9)) * 1000;
-        Laser.StartTime = millis();
+        //Laser.StartTime = millis();
+        Laser.ActiveTime = 0;
         return;
       default:
         return;
@@ -82,32 +85,13 @@ void Activate_Laser_Random(int Size)
   }
 }
 
-void Dump_Laser(struct Laser obj)
-{
-  Serial.print("Active = ");
-  Serial.println(obj.Active);
-  Serial.print("LeftCoord = ");
-  Serial.println(obj.TopLeftCoords[0]);
-  Serial.print("TopCoord = ");
-  Serial.println(obj.TopLeftCoords[1]);
-  Serial.print("Height = ");
-  Serial.println(obj.Height);
-  Serial.print("Duration = ");
-  Serial.println(obj.Duration);
-  Serial.print("StartTime = ");
-  Serial.println(obj.StartTime);
-  Serial.print("ActiveTime = ");
-  Serial.println(obj.ActiveTime);
-  Serial.print("AnimationSpeed = ");
-  Serial.println(obj.AnimationSpeed);
-}
-
 void Display_Laser()
 {
   int LeftCoord;
   if(Laser.Active)
   {
-    Laser.ActiveTime = millis() - Laser.StartTime;
+    //Laser.ActiveTime = millis() - Laser.StartTime;
+    Laser.ActiveTime += LoopTime;
     if (Laser.ActiveTime > (Laser.Duration + 2000))
     {
       Deactivate_Laser(0);

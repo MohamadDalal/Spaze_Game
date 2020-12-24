@@ -28,6 +28,26 @@ void ShipDataDump(struct Ship obj)
   Serial.println(obj.BottomRightCoords[1]);
 }
 
+void Dump_Laser(struct Laser obj)
+{
+  Serial.print("Active = ");
+  Serial.println(obj.Active);
+  Serial.print("LeftCoord = ");
+  Serial.println(obj.TopLeftCoords[0]);
+  Serial.print("TopCoord = ");
+  Serial.println(obj.TopLeftCoords[1]);
+  Serial.print("Height = ");
+  Serial.println(obj.Height);
+  Serial.print("Duration = ");
+  Serial.println(obj.Duration);
+  //Serial.print("StartTime = ");
+  //Serial.println(obj.StartTime);
+  Serial.print("ActiveTime = ");
+  Serial.println(obj.ActiveTime);
+  Serial.print("AnimationSpeed = ");
+  Serial.println(obj.AnimationSpeed);
+}
+
 // This is a screen used to test the menu cursor navigation function
 void Menu_Navigation_Screen()
 {
