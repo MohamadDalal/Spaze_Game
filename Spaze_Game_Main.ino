@@ -4,6 +4,14 @@
 #include <SPI.h>
 #include "GY521.h"
 
+/*------------------------------------Notes--------------------------------------------------------------------------------
+The comments on the buttons show their functionalities when not inversed
+As the inversion effects the pin reading instead of the button press function reading
+
+The if else if checks for the menues can probably be made into switches, but I am already too deep in
+
+-------------------------------------------------------------------------------------------------------------------------*/
+
 /*-------------------------------------Pins--------------------------------
 Screen          Using SPI
 GND             GND
@@ -30,23 +38,26 @@ GY521 Gyroscope(0x68);                                                  // Initi
 
 //int fpsValueLen = 28;                                   // Used for testing many fps values with the one under it too
 //int fpsValues[] = {60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 230, 240, 300, 360, 420, 480, 10, 20, 30, 40, 50};
-int fpsValueLen = 5;                                    // Length of fps array. Used for cycling in the menu option
-int fpsValues[] = {60, 120, 144, 240, 2000};            // Fps values to cycle between. This is the one being displayed currently
-int fpsDisplayValues[] = {60, 120, 144, 240, 2000};     // Real fps values to display, after program delay is taken into account. Will be used when fps is finalized
+int fpsValueLen = 4;                                    // Length of fps array. Used for cycling in the menu option
+int fpsValues[] = {60, 120, 144, 2000};            // Fps values to cycle between. This is the one being displayed currently
+char fpsDisplayValues[][4] = {"60", "120", "144", "inf"};     // This is what the menu shows, it is so it shows infinity instead of 2000 (Because 2000 is no delay)
 int fpsValueNum = 0;                                    // Decides which element of the array the fps value will take. Changable in Settings
 int fpsMax = fpsValues[fpsValueNum];                       // The Fps to run with. It is actually just extra delay in the loop
-int fpsDelay = 0;
-int LastfpsDelay = 0;
+int fpsDelay = 0;                                       // Delay to be added to the loop in order to hold as close to the max fps as possible
+int LastfpsDelay = 0;                                   // Used to store the fps delay in the last loop. Used to fine tune the fps delay
 
 /*----------------------------------------------------------------------------------
 Notes for fps:
 - The fps is not fully correct. By the time of writing this 240fps gives 83fps in menus and 67fps ingame
 - FPS will be adjusted later when the entire program is done
+Ignore above
+- FPS must be finished
+- FPS was set into Max FPS, where the program puts a delay to hold the max fps, if the programs fps is lower than the max fps, then no delay is added.
 ------------------------------------------------------------------------------------*/
 
 unsigned long LastLoopTime = 0;     // This is used for testing fps. Records the millis() value of when the loop last ran
 unsigned long LoopTime = 0;         // This is used for testing fps. Shows the time it takes for the loop to finish. Can also detect unwanted delays.
-unsigned long GameTime = 0;
+unsigned long GameTime = 0;         // The time that the game has ran, used to display the time at the middle of the HUD
 
 int Menu = 0;               // Menu 0 is main menu, menu 1 is game menu, menu 2 is error menu
 // The two under have been replaced by the SubMenu
@@ -67,7 +78,7 @@ Suggestion to make the submenus all have different numbers, so you don't get acc
 bool SlowCalRun = false;    // If this is true, then the program runs the slow calibration process
 int SlowCalTime = 0;        // Might be used to display a counter when the slow cal process is working (Will need to redesign how that thing works, if I want to implement this)
 int MenuCursor = 0;         // Used to show which thing the cursor is pointing at
-bool UseYaw = false;         // This setting decides if the horizontal movement will use Yaw or Roll angles
+bool UseYaw = false;        // This setting decides if the horizontal movement will use Yaw or Roll angles
 bool InvertButtons = false; // Inverts the functions of the LB and the RB. Used in the controls function, where the pin it reads from has been inverted. Also used in the menu display functions to change what is written at the bottom
 bool CorruptShip = false;   // Invert the two ship bitmaps :P
 unsigned long FastCalPressTime;   // When the fast cal is pressed make this record the time it has been pressed, so it can show something for an amount of time for feedback
@@ -88,7 +99,7 @@ void setup()
   Gyro_Init();                              // Run function to start Gyroscope
   pinMode(34, INPUT);                       // Set pin for the left button
   pinMode(35, INPUT);                       // Set pin for the right button
-  //ShipSetup();                              // Setup all the ships
+  //ShipSetup();                              // Setup all the ships. Now it setups the ship when the game actually starts instead in the program setup
   //ShipDataDump(Player);                     // This is unusuable after I have returned the ship struct to its rightfull place. Will find another way to use this later
   //Serial.println("Setup ran 1");
   SlowCalRun = true;                        // Let the slow calibrator run at the start of the program
@@ -101,33 +112,33 @@ void loop()
 {
 //----------------------FPS Stuff------------------------
   LoopTime = millis() - LastLoopTime;       // Set up LoopTime
-  Serial.print("LoopTime ");
-  Serial.println(LoopTime);
-  Serial.print ("FPS ");
-  Serial.println(1000 / LoopTime);
+  //Serial.print("LoopTime ");
+  //Serial.println(LoopTime);
+  //Serial.print ("FPS ");
+  //Serial.println(1000 / LoopTime);
   LastLoopTime = millis();                  // Record time, to use in the next LoopTime setup
-  fpsDelay = LastfpsDelay + ((1000 / fpsMax) - LoopTime);
-  Serial.print ("FPS Delay ");
-  Serial.println(fpsDelay);
-  if (fpsDelay < 0)
+  fpsDelay = LastfpsDelay + ((1000 / fpsMax) - LoopTime);   // Adjust the delay so that it makes the programs fps closer to the max fps
+  //Serial.print ("FPS Delay ");
+  //Serial.println(fpsDelay);
+  if (fpsDelay < 0)                         // If the delay needed is negative (The fps is lower than the max fps)
   {
-    fpsDelay = 0;
-    LastfpsDelay = 0;
+    fpsDelay = 0;                           // Add no delay
+    LastfpsDelay = 0;                       // Update the last fps delay
   }
-  else
+  else                                      // Otherwise if a delay is needed
   {
-    LastfpsDelay = fpsDelay;
+    LastfpsDelay = fpsDelay;                // Update the last fps delay with that delay
   }
 //-------------------------------------------------------
   
   if(not Gyroscope.isConnected())           // Check if the Gyroscope is connected
   {
     // If not record the last menu that the program was in
-    LastMenu = Menu;
-    LastSubMenu = SubMenu;
+    LastMenu = Menu;                        // Set the last menu so it return to the right menu when the gyro is connected again
+    LastSubMenu = SubMenu;                  // Set the last submenu so it return to the right submenu when the gyro is connected again
     // Switch to the Gyroscope connection error menu
-    Menu = 2;
-    SubMenu = 1;
+    Menu = 2;                               // Go to the errors menu
+    SubMenu = 1;                            // Go to the gyroscope connection error submenu
   }
   //Serial.println("Loop started running");
   //printf("3-Menu is %i \n", Menu);
@@ -144,7 +155,7 @@ void loop()
   if(Menu == 0)                             // If Main Menues
   {
     //Serial.println("Switch 0");
-    if(SubMenu == 0)                          // If Main Menu
+    if(SubMenu == 0)                          // If the Main Menu
     {
       //Serial.println("Switch 00");
       //Menu_Navigation_Screen();
@@ -168,8 +179,9 @@ void loop()
             Menu = 1;
             SubMenu = 0;
             MenuCursor = 0;
+            
             ShipSetup();                              // Setup all the ships
-            GameTime = 0;
+            GameTime = 0;                             // Reset the game time to 0 (This is also done when the game is exited from the pause menu, but it is done here again just to be safe)
             
             Gyro_Fast_Cal();                          // Run the fast calibrator
             //delay(100);
@@ -216,22 +228,26 @@ void loop()
       
       if(LB_Press())                            // If the left button was pressed (Return)
       {
-        if(FromPause)
+        if(FromPause)                             // If this menu has been accessed from the pause menu
         {
+          // Set the menu to the ingame pause menu and reset cursor
           Menu = 1;
           SubMenu = 1;
           MenuCursor = 0;
-          delay(fpsDelay);
-          return;
+          
+          delay(fpsDelay);                          // Apply the fps delay
+          return;                                   // Return to the start of the main loop
         }
-        else
+        else                                      // If it is accessed from the main menu
         {
+          // Set the menu to the main menu and reset cursor
           Menu = 0;
-          SubMenu = 0;                            // Return the sub menu to the main menu values
-          MenuCursor = 1;                         // Reset cursor position
+          SubMenu = 0;
+          MenuCursor = 1;
+          
           //delay(100);
-          delay(fpsDelay);                        // Run the fps delay
-          return;                                 // Return from the start of the main loop
+          delay(fpsDelay);                          // Run the fps delay
+          return;                                   // Return from the start of the main loop
         }
       }
       else if(RB_Press())                       // If the right button was pressed (Select)
@@ -242,8 +258,8 @@ void loop()
           case 0:                                   // FPS changing setting
             //Serial.println("RB_Pressed settings case 0");
             // Change the fps value
-            fpsValueNum = (fpsValueNum + 1) % fpsValueLen;
-            fpsMax = fpsValues[fpsValueNum];
+            fpsValueNum = (fpsValueNum + 1) % fpsValueLen;    // Change the max fps to the next fps setting
+            fpsMax = fpsValues[fpsValueNum];                  // Apply the change
             
             //delay(100);
             delay(fpsDelay);                          // Run the fps delay
@@ -256,30 +272,29 @@ void loop()
             //delay(100);
             delay(fpsDelay);
             return;
-          case 2:                                   // Difficulty
+          case 2:                                   // Difficulty or Fast Calibration
             //Serial.println("RB_Pressed settings case 2");
             // If I ever have time to implement this, then I will write something here
-            if(FromPause)
+            if(FromPause)                             // If the menu was accessed from the pause menu
             {
-              // Fill this right when difficulty is implemented
-              Gyro_Fast_Cal();
-              FastCalPressTime = millis();
+              Gyro_Fast_Cal();                          // Run the fast callibratior
+              FastCalPressTime = millis();              // Set the time the calibrator was run
             }
-            /*else
+            /*else                                    // Else nothing because difficulty is not changeable yet
             {
               
             }*/
             //delay(100);
-            delay(fpsDelay);
-            return;
-          default:                                  // In case the cursor is in a place it is not supposed to be in
+            delay(fpsDelay);                        // Apply the fps delay
+            return;                                 // return to the start of the main loop
+          default:                                // In case the cursor is in a place it is not supposed to be in
             // Set the menu to the unknown error menu and reset the cursor
             Menu = 2;
             SubMenu = 0;
             MenuCursor = 0;
             //delay(100);
-            delay(fpsDelay);                          // Run the fps delay
-            return;                                   // Return to the main loop
+            delay(fpsDelay);                        // Run the fps delay
+            return;                                 // Return to the main loop
         }
       }
     }
@@ -290,19 +305,23 @@ void loop()
       Menu_Navigation();                        // Enable menu navigation
       if(LB_Press())                            // If the left button was pressed (Return)
       {
-        if(FromPause)
+        if(FromPause)                             // If this was accessed from the pause menu
         {
+          // Set the menu to the ingame pause menu and reset the cursor
           Menu = 1;
           SubMenu = 1;
           MenuCursor = 1;
-          delay(fpsDelay);
-          return;
+          
+          delay(fpsDelay);                          // Apply the fps delay
+          return;                                   // Return to the start of the loop
         }
-        else
+        else                                      // If it was accessed from the main menu
         {
+          // Set the menu value to the main menu and reset the cursor position
           Menu = 0;
-          SubMenu = 0;                              // Go to the main menu
-          MenuCursor = 2;                           // Reset cursor position
+          SubMenu = 0;
+          MenuCursor = 2;
+          
           //delay(100);
           delay(fpsDelay);                          // Run the fps delay
           return;                                   // Return to the main loop
@@ -316,9 +335,11 @@ void loop()
       Menu_Navigation();
       if(LB_Press())                            // If the left button was pressed (Return)
       {
+        // Set the menu to the settings menu and reset the cursor
         Menu = 0;
-        SubMenu = 1;                            // Return the sub menu to the Settings value
-        MenuCursor = 1;                         // Reset cursor position
+        SubMenu = 1;
+        MenuCursor = 1;
+        
         //delay(100);
         delay(fpsDelay);                        // Run the fps delay
         return;                                 // Return from the start of the main loop
@@ -339,28 +360,29 @@ void loop()
             //Serial.println("RB_Pressed controls case 1");
             // Invert the functions of the left and right buttons
             InvertButtons = !InvertButtons;
-            delay(250);
-            delay(fpsDelay);
-            return;
+            delay(250);                               // Add an extra 250ms delay, because the millis check does not work with the buttons at the exact time they inverted
+            delay(fpsDelay);                          // Run the fps delay
+            return;                                   // Return to the start of the main loop
           case 2:                                   // Corrupted ship mode
             //Serial.println("RB_Pressed controls case 2");
             // Corrupt the ship by inverting the two bitmaps
-            if(FromPause)
+            if(FromPause)                             // If this option was triggered, when the settings menu was accessed from the pause menu
             {
-              CorruptShip = CorruptShip;
+              CorruptShip = CorruptShip;                // Do not change the corruption (There is no turning back)
             }
-            else
+            else                                      // If this option was triggered, when the settings menu was accessed from the main menu
             {
-              CorruptShip = !CorruptShip;
+              CorruptShip = !CorruptShip;               // Invert the corruption option
             }
             //delay(100);
-            delay(fpsDelay);
-            return;
+            delay(fpsDelay);                          // Apply the fps delay
+            return;                                   // Return to the start of the main loop
           default:                                  // In case the cursor is in a place it is not supposed to be in
             // Set the menu to the unknown error menu and reset the cursor
             Menu = 2;
             SubMenu = 0;
             MenuCursor = 0;
+            
             //delay(100);
             delay(fpsDelay);                          // Run the fps delay
             return;                                   // Return to the main loop
@@ -372,36 +394,38 @@ void loop()
       Serial.println("The Sub menu value is not a known value. This is from the main menues");
       Menu = 2;
       SubMenu = 0;
+      
       //delay(100);
       delay(fpsDelay);
       return;
     }
-    delay(fpsDelay);                          // Run the fps delay
+    delay(fpsDelay);                          // Run the fps delay for
   }
   else if(Menu == 1)                        // If the Ingame Menues
   {
     // No sub menues have been implemented yet. A possible sub menu is the pause screen
     //Serial.println("Switch 2");
-    if(SubMenu == 0)
+    if(SubMenu == 0)                          // Ingame
     {
-      GameTime += LoopTime;
-      u8g2.clearBuffer();
-      Game_HUD();
-      Game_Screen();                              // Run the Game displaying function. ClearBuffer is in here
-      u8g2.sendBuffer();                          // Only one sendBuffer() must be used per loop, as that thing lags like hell. Therefore, the game screen sends after everything was fully drawn
-      Game_Move_Vert();                           // Check for vertical movement from the gyroscope
-      if(Pause_Game())                            // Check if the pause movement has been triggered
+      GameTime += LoopTime;                     // Calculate the time that the game session has been running
+      u8g2.clearBuffer();                       // Clear the buffer before sending the visuals
+      Game_HUD();                               // Run the HUD displaying function
+      Game_Screen();                            // Run the Game displaying function.
+      u8g2.sendBuffer();                        // Only one sendBuffer() must be used per loop, as that thing lags like hell. Therefore, the game screen sends after everything was fully drawn
+      Game_Move_Vert();                         // Check for vertical movement from the gyroscope
+      if(Pause_Game())                          // Check if the pause movement has been triggered (Heavy shake)
       {
         // No pause menu has been made yet, so the program returns to the main menu
         Serial.println("Game has been paused.");
-        // Set the values back to the main menu
+        // Set the values back to the main menu and reset the cursor
         Menu = 1;
         SubMenu = 1;
         MenuCursor = 0;
-        //ShipSetup();                                // Reset the sprites position
+        
+        //ShipSetup();                              // Reset the sprites position. No longer needed after making a proper pause menu
         //delay(100);
-        delay(fpsDelay);
-        return;
+        delay(fpsDelay);                            // Run the fps delay
+        return;                                     // Return to the start of the main loop
       }
       if(UseYaw)                                  // Check if you are supposed to use Yaw (Steering wheel mode) for horizontal movement
       {
@@ -415,89 +439,94 @@ void loop()
       {
         Serial.println("LB_Pressed in game");
         Gyro_Fast_Cal();                            // Run the fast callibrator
-        FastCalPressTime = millis();
-        // Paint a circle for a bit of feedback. Only for debuging
-        u8g2.drawCircle(100, 25, 10, U8G2_DRAW_ALL);
-        u8g2.sendBuffer();
+        FastCalPressTime = millis();                // Set the time that the fast callibrator has been triggered
+        //u8g2.drawCircle(100, 25, 10, U8G2_DRAW_ALL); // Paint a circle for a bit of feedback. Only for debuging
+        //u8g2.sendBuffer();
         //return;
       }
-      
-      else if(RB_Press())                         // Check if the right button has been pressed
+      else if(RB_Press())                         // Check if the right button has been pressed. Everything here is for testing, the right button will be used to pause the game
       {
         Serial.println("RB_Pressed in game");
-        //UseYaw = !UseYaw;                  // Switch to Yaw mode (This is not the final action. This button had nothing to do so this was added to it. Horizontal controlls will be changed in the settings at the end)
+        //UseYaw = !UseYaw;                         // Switch to Yaw mode (This is now in the settings menu)
         //Activate_Laser(0, 32, 16, 4000);
-        BigLaser = (BigLaser + 1) % 2;
+        BigLaser = (BigLaser + 1) % 2;              // Change the value for firing a big laser
         Serial.print("BigLaser ");
         Serial.println(BigLaser);
-        Activate_Laser_Random(BigLaser);
+        Activate_Laser_Random(BigLaser);            // Fire a laser with random settings
         //Dump_Laser(Laser);
       }
-      
     }
-    else if(SubMenu == 1)
+    else if(SubMenu == 1)                       //Pause Menu
     {
-      Pause_Menu();
-      Menu_Navigation();
-      if(LB_Press())
+      Pause_Menu();                               // Display the pause menu
+      Menu_Navigation();                          // Detect menu navigation
+      if(LB_Press())                              // If left button is pressed (Back)
       {
+        // Set the ingame menu and reset the cursor position
         Menu = 1;
         SubMenu = 0;
         MenuCursor = 0;
       }
-      else if(RB_Press())
+      else if(RB_Press())                         // If the right button is pressed (Select)
       {
         Serial.println("RB_Pressed in pause menu");
         switch(MenuCursor)                        // Check where the cursor was on
         {
           case 0:                                   // Settings
             //Serial.println("RB_Pressed pause case 0");
+            // Switch to the settings menu and reset cursor
             Menu = 0;
             SubMenu = 1;
             MenuCursor = 0;
-            FromPause = true;
+            
+            FromPause = true;                         // Tell the program that the menu has been accessed from the pause menu
             //delay(100);
             delay(fpsDelay);                          // Run the fps delay
             return;                                   // Return to the start of the main loop
           case 1:                                   // Help
             //Serial.println("RB_Pressed pause case 1");
-            // Invert the functions of the left and right buttons
+            // Set the menu to the help menu and reset the cursor
             Menu = 0;
             SubMenu = 2;
             MenuCursor = 0;
-            FromPause = true;
-            delay(fpsDelay);
-            return;
+            
+            FromPause = true;                         // Tell the program that the menu has been accessed from the pause menu
+            delay(fpsDelay);                          // Run the fps delay
+            return;                                   // Return to the start of the main loop
           case 2:                                   // Main menu
             //Serial.println("RB_Pressed pause case 2");
-            // Corrupt the ship by inverting the two bitmaps
+            // Set the menu to the main menu and reset the cursor
             Menu = 0;
             SubMenu = 0;
             MenuCursor = 0;
-            GameTime = 0;
-            FromPause = false;
+            
+            GameTime = 0;                             // Reset the game time, as we have left the game
+            FromPause = false;                        // Reset the value, as we are now in the main menu
             //delay(100);
-            delay(fpsDelay);
-            return;
+            delay(fpsDelay);                          // Run the fps delay
+            return;                                   // Return to the start of the main loop
           default:                                  // In case the cursor is in a place it is not supposed to be in
             // Set the menu to the unknown error menu and reset the cursor
             Menu = 2;
             SubMenu = 0;
             MenuCursor = 0;
+            
             //delay(100);
             delay(fpsDelay);                          // Run the fps delay
             return;                                   // Return to the main loop
         }
       }
     }
-    else
+    else                                        // The submenu is an unknown value
     {
       Serial.println("The Sub menu value is not a known value. This is from the ingame menues");
+      // Run the unknown error menu
       Menu = 2;
       SubMenu = 0;
+      
       //delay(100);
-      delay(fpsDelay);
-      return;
+      delay(fpsDelay);                            // Run the fps delay
+      return;                                     // Return to the start of the main loop
     }
     //delay(100);
     delay(fpsDelay);                            // Run the fps delay

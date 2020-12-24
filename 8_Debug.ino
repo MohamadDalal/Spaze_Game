@@ -28,6 +28,7 @@ void ShipDataDump(struct Ship obj)
   Serial.println(obj.BottomRightCoords[1]);
 }
 
+// Prints the values inside the struct of a specific laser object
 void Dump_Laser(struct Laser obj)
 {
   Serial.print("Active = ");

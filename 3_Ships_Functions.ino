@@ -69,23 +69,26 @@ struct Ship CreateShip(struct Ship obj, int Type, int spd, int hp, int LUx, int 
   return obj;
 }
 
-// Write the ships you want to create here, then the setup function will just run this function to create them
+// Write the ships you want to create here, then this function will be run to create them at the start of a game session
 void ShipSetup()
 {
   //Serial.println("ShipSetup ran");    //Debug
   //struct Ship Player;                 //Struct had to be initialized in global area, so this failed
-  int PlayerBMx1;
-  int PlayerBMx2;
-  if(CorruptShip)
+  int PlayerBMx1;                       // Store the x value of the first bitmap of the player
+  int PlayerBMx2;                       // Store the x value of the first bitmap of the player
+  if(CorruptShip)                       // If the corrupt ship option is triggered
   {
+    //Invert the two bitmaps horizontally
     PlayerBMx1 = 6;
     PlayerBMx2 = 0;
   }
-  else
+  else                                  // If it is not
   {
+    // Put the correct value in
     PlayerBMx1 = 0;
     PlayerBMx2 = 3;
   }
+  // Create the ships by running create ship function
   Player = CreateShip(/*obj*/Player,/*Type*/ 1,/*spd*/ 150,/*HP*/ 5,/*LUx*/ 26,/*LUy*/ 32,/*BMNo*/ 2,/*BMA1*/ 1,/*BMA2*/ 2,/*BMA3*/ 0,/*BMx1*/ PlayerBMx1,/*BMy1*/ 0,/*BMx2*/ PlayerBMx2,/*BMy2*/ 2,/*BMx3*/ 0,/*BMy3*/ 0);
 }
 

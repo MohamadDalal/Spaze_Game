@@ -37,6 +37,33 @@ void Menu_Navigation()
   }
 }
 
+// Function to navigate through the pages using gyroscope and tilting motion. Uses the same millis check as the menu navigation, since these two function don't run in the same menu
+void Page_Navigation(int PageCount)
+{
+  if(gy > 150)                                  // Check if the device has been tilted down, by checking for high y-axis positive rotation speed
+  {
+    if((millis() - MNLastRan) < 250)            // Check if the tilt has already been activated in the last 250ms, if yes then don't activate a new one
+    {
+      Serial.println("MN Millis effect");
+      return;
+    }
+    Serial.println("Down it goes");
+    Page = (Page + 1) % PageCount;              // Go through the cyclic set with PageCount cardinality forwards    
+    MNLastRan = millis();                       // Set the last time this function has run for the millis check
+  }
+  else if(gy < -150)                            // Check if the device has been tilted up, by checking for high y-axis negative rotation speed
+  {
+    if((millis() - MNLastRan) < 250)            // Check if the tilt has already been activated in the last 250ms, if yes then don't activate a new one
+    {
+      Serial.println("MN Millis effect");
+      return;
+    }
+    Serial.println("Up it goes");
+    Page = (PageCount - 1 + Page) % PageCount;  // Go through the cyclic set with PageCount cardinality backwards. I love this function, I was able to prove its generality by induction
+    MNLastRan = millis();                       // Set the last time this function has run for the millis chack
+  }
+}
+
 // Function to check if the left button has been pressed
 bool LB_Press()
 {
@@ -137,6 +164,7 @@ bool Pause_Game()
   }
 }
 
+// The comments for all moving functions are at the start of the Yaw moving function. I am not commenting all 6 almost identical procedures
 // This function reads the Pitch rotation adjusted with the calibrators to detect vertical movement
 // The way the pixles are moved is explained in a paper somewhere in my Linear Algebra notebook
 void Game_Move_Vert()
@@ -403,7 +431,7 @@ void Game_Move_Yaw_Hor()
       MoveHor -= (Speed / fps);                                 // Full speed to the left (No angle ratio calculation)
       //MoveHor -= (Speed / (1000 / LoopTime));
       MoveHorInt = int(MoveHor);                                // Make an integer, because pixles move in integers (If the moving thing is more than 1 then round down the value, else no moevement (Value is 0))
-      if((Player.TopLeftCoords[0] + MoveHorInt) <= 13)           // Check if the ship will go out of the screen after moving
+      if((Player.TopLeftCoords[0] + MoveHorInt) <= 13)          // Check if the ship will surpass the left boundary after moving
       {
         Serial.println("Ship went too much left ");
         return;                                                 // If so then don't move the ship. This is a better method than just preventing movement at the start fo the function, as was done before
@@ -416,6 +444,7 @@ void Game_Move_Yaw_Hor()
     {
       MoveHor -= ((Yaw - RollYawDZMin)/(RollYawDZMax - RollYawDZMin)) * (Speed / fps);    // Make a linear ration from the angle and mutiply it with the speed
       //MoveHor -= ((Yaw - RollYawDZMin)/(RollYawDZMax - RollYawDZMin)) * (Speed / (1000 / LoopTime));
+      
       // This is literally the same lines as above, just read the comments above
       MoveHorInt = int(MoveHor);
       if((Player.TopLeftCoords[0] + MoveHorInt) <= 13)
@@ -429,7 +458,7 @@ void Game_Move_Yaw_Hor()
     }
   }
 
-  // All 6 of these movements work the same, just using different angles, I commented one so that's enough for now
+  // All 6 of these movements work the same, just using different angles, I commented one so that's enough
   if(Yaw < -RollYawDZMin)    // Right
   {
     Serial.println("Right the ship goes with Yaw");
