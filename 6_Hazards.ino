@@ -244,13 +244,13 @@ void Activate_Explosion_Random()
   {
     if((Laser.TopLeftCoords[1] > 12) and ((Laser.TopLeftCoords[1] + Laser.Height) < 61))
     {
-      int ExplosionOverLaser = random(0,1);
+      int ExplosionAboveLaser = random(0,2);
       int Radius;
       int xCoord;
       float Distance;
       bool WhileCheck;
       int LoopDaLoopStartTime = millis();
-      if(ExplosionOverLaser)
+      if(ExplosionAboveLaser)
       {
         do
         {
