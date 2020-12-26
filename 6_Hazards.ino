@@ -93,6 +93,7 @@ void Activate_Laser_Random(int Size)
         Serial.println("The size of the laser was not 0 or 1");
         return;
     }
+  //Dump_Laser(Laser);                                                      // Dump the data of the laser
   }
 }
 
@@ -158,7 +159,409 @@ void Display_Laser()
 
 
 // Explosions function
+const int ExplosionsMax = 10;
 
+struct Explosion
+{
+  int Active = 0;
+  bool DetectHit = false;
+  int CenterCoords[2] = {-64, -64};
+  int BigRad = 0;
+  int SmallRad = 0;
+  int Duration = 0;
+  int ActiveTime = 0;
+  int Speed = 1000;
+  int AnimationSpeed = 200;
+};
+struct Explosion Explosion[ExplosionsMax];
+
+void Dump_Explosion(int Num)
+{
+  Serial.print("Dumping explosion number ");
+  Serial.println(Num);
+  Serial.print("Acive? "); 
+  Serial.println(Explosion[Num].Active);
+  Serial.print("X Coordinate ");
+  Serial.println(Explosion[Num].CenterCoords[0]);
+  Serial.print("Y Coordinate ");
+  Serial.println(Explosion[Num].CenterCoords[1]);
+  Serial.print("Big Circle Radius ");
+  Serial.println(Explosion[Num].BigRad);
+  Serial.print("Small Circle Radius ");
+  Serial.println(Explosion[Num].SmallRad);
+  Serial.print("Duration ");
+  Serial.println(Explosion[Num].Duration);
+  Serial.print("Active Time ");
+  Serial.println(Explosion[Num].ActiveTime);
+  Serial.print("Speed ");
+  Serial.println(Explosion[Num].Speed);
+  Serial.print("Animation Speed ");
+  Serial.println(Explosion[Num].AnimationSpeed);
+}
+
+void Activate_Explosion(int Num, int xPos, int yPos, int Rad, int Duration)
+{
+  Serial.println("Explosion activated");
+  if(Explosion[Num].Active)
+  {
+    return;
+  }
+  else
+  {
+    Explosion[Num].Active = 1;
+    Explosion[Num].CenterCoords[0] = xPos;
+    Explosion[Num].CenterCoords[1] = yPos;
+    Explosion[Num].BigRad = Rad;
+    Explosion[Num].Duration = Duration;
+    Explosion[Num].ActiveTime = 0;
+  }
+}
+
+void Activate_Explosion_Random()
+{
+  int Total = ExplosionsMax;
+  int Num = -1;
+  Serial.println("Random explosion activated");
+  for(int i = 0; i < Total; i++)
+  {
+    if(Explosion[i].Active)
+    {
+      continue;
+    }
+    else
+    {
+      Serial.print("Found empty slot at ");
+      Serial.println(i);
+      Num = i;
+      break;
+    }
+  }
+  if(Num == -1)
+  {
+    return;
+  }
+  else if(Laser.Active)
+  {
+    if((Laser.TopLeftCoords[1] > 12) and ((Laser.TopLeftCoords[1] + Laser.Height) < 61))
+    {
+      int ExplosionOverLaser = random(0,1);
+      int Radius;
+      int xCoord;
+      float Distance;
+      bool WhileCheck;
+      int LoopDaLoopStartTime = millis();
+      if(ExplosionOverLaser)
+      {
+        do
+        {
+          if(Laser.TopLeftCoords[1] > 20)
+          {
+            Radius = random(12, 21);
+          }
+          else
+          {
+            Radius = random(12, Laser.TopLeftCoords[1]);
+          }
+          xCoord = random((13 + Radius), (121 - Radius));
+          WhileCheck = true;
+          for(int i = 0; i < Total; i++)
+          {
+            if(Explosion[i].Active)
+            {
+              Distance = sqrt(((Explosion[i].CenterCoords[0] - xCoord) * (Explosion[i].CenterCoords[0] - xCoord)));
+              if(Distance > max(Explosion[i].BigRad, Radius))
+              {
+                WhileCheck = false;
+              }
+              else
+              {
+                WhileCheck = true;
+                break;
+              }
+            }
+            else
+            {
+              WhileCheck = false;
+            }
+          }
+          Serial.println("LoopDaLoop");
+          if((millis() - LoopDaLoopStartTime) > (LoopTime * 5))
+          {
+            Serial.println("Too many loops");
+            return;
+          }
+        } while(WhileCheck);
+        Explosion[Num].CenterCoords[0] = xCoord;
+        Explosion[Num].CenterCoords[1] = random(Radius, Laser.TopLeftCoords[1]);
+        Explosion[Num].BigRad = Radius;
+      }
+      else
+      {
+        do
+        {
+          if((Laser.TopLeftCoords[1] + Laser.Height) < 42)
+          {
+            Radius = random(12, 21);
+          }
+          else
+          {
+            Radius = random(12, (64 - (Laser.TopLeftCoords[1] + Laser.Height)));
+          }
+          xCoord = random((13 + Radius), (121 - Radius));
+          WhileCheck = true;
+          for(int i = 0; i < Total; i++)
+          {
+            if(Explosion[i].Active)
+            {
+              Distance = sqrt(((Explosion[i].CenterCoords[0] - xCoord) * (Explosion[i].CenterCoords[0] - xCoord)));
+              if(Distance > max(Explosion[i].BigRad, Radius))
+              {
+                WhileCheck = false;
+              }
+              else
+              {
+                WhileCheck = true;
+                break;
+              }
+            }
+            else
+            {
+              WhileCheck = false;
+            }
+          }
+          Serial.println("LoopDaLoop");
+          if((millis() - LoopDaLoopStartTime) > (LoopTime * 5))
+          {
+            Serial.println("Too many loops");
+            return;
+          }
+        } while(WhileCheck);
+        Explosion[Num].CenterCoords[0] = xCoord;
+        Explosion[Num].CenterCoords[1] = random((Laser.TopLeftCoords[1] + Laser.Height), 64 - Radius);
+        Explosion[Num].BigRad = Radius;
+      }
+      Explosion[Num].Duration = random(2, 5) * 1000;
+      Explosion[Num].ActiveTime = 0;
+      Explosion[Num].Active = 1;
+      //Dump_Explosion(Num);
+    }
+    else if(Laser.TopLeftCoords[1] > 12)
+    {
+      int Radius;
+      int xCoord;
+      float Distance;
+      bool WhileCheck;
+      int LoopDaLoopStartTime = millis();
+      do
+      {
+        if(Laser.TopLeftCoords[1] > 20)
+        {
+          Radius = random(12, 21);
+        }
+        else
+        {
+          Radius = random(12, Laser.TopLeftCoords[1]);
+        }
+        xCoord = random((13 + Radius), (121 - Radius));
+        WhileCheck = true;
+        for(int i = 0; i < Total; i++)
+        {
+          if(Explosion[i].Active)
+          {
+            Distance = sqrt(((Explosion[i].CenterCoords[0] - xCoord) * (Explosion[i].CenterCoords[0] - xCoord)));
+            if(Distance > max(Explosion[i].BigRad, Radius))
+            {
+              WhileCheck = false;
+            }
+            else
+            {
+              WhileCheck = true;
+              break;
+            }
+          }
+          else
+          {
+            WhileCheck = false;
+          }
+        }
+        Serial.println("LoopDaLoop");
+        if((millis() - LoopDaLoopStartTime) > (LoopTime * 5))
+        {
+          Serial.println("Too many loops");
+          return;
+        }
+      } while(WhileCheck);
+      Explosion[Num].CenterCoords[0] = xCoord;
+      Explosion[Num].CenterCoords[1] = random(Radius, Laser.TopLeftCoords[1]);
+      Explosion[Num].BigRad = Radius;
+      Explosion[Num].Duration = random(2, 5) * 1000;
+      Explosion[Num].ActiveTime = 0;
+      Explosion[Num].Active = 1;
+      //Dump_Explosion(Num);
+    }
+    else if((Laser.TopLeftCoords[1] + Laser.Height) < 50)
+    {
+      int Radius;
+      int xCoord;
+      float Distance;
+      bool WhileCheck;
+      int LoopDaLoopStartTime = millis();
+      do
+      {
+        if((Laser.TopLeftCoords[1] + Laser.Height) < 42)
+        {
+          Radius = random(12, 21);
+        }
+        else
+        {
+          Radius = random(12, (64 - (Laser.TopLeftCoords[1] + Laser.Height)));
+        }
+        xCoord = random((13 + Radius), (121 - Radius));
+        WhileCheck = true;
+        for(int i = 0; i < Total; i++)
+        {
+          if(Explosion[i].Active)
+          {
+            Distance = sqrt(((Explosion[i].CenterCoords[0] - xCoord) * (Explosion[i].CenterCoords[0] - xCoord)));
+            if(Distance > max(Explosion[i].BigRad, Radius))
+            {
+              WhileCheck = false;
+            }
+            else
+            {
+              WhileCheck = true;
+              break;
+            }
+          }
+          else
+          {
+            WhileCheck = false;
+          }
+        }
+        Serial.println("LoopDaLoop");
+        if((millis() - LoopDaLoopStartTime) > (LoopTime * 5))
+        {
+          Serial.println("Too many loops");
+          return;
+        }
+      } while(WhileCheck);
+      Explosion[Num].CenterCoords[0] = xCoord;
+      Explosion[Num].CenterCoords[1] = random((Laser.TopLeftCoords[1] + Laser.Height), 64 - Radius);
+      Explosion[Num].BigRad = Radius;
+      Explosion[Num].Duration = random(2, 5) * 1000;
+      Explosion[Num].ActiveTime = 0;
+      Explosion[Num].Active = 1;
+      //Dump_Explosion(Num);
+    }
+    else
+    {
+      return;
+    }
+  }
+  else
+  {
+    int Radius;
+    int xCoord;
+    int yCoord;
+    float Distance;
+    bool WhileCheck;
+    int LoopDaLoopStartTime = millis();
+    do
+    {
+      Radius = random(12, 21);
+      xCoord = random((13 + Radius), (121 - Radius));
+      yCoord = random(Radius, (64 - Radius));
+      WhileCheck = true;
+      for(int i = 0; i < Total; i++)
+      {
+        if(Explosion[i].Active)
+        {
+          Distance = sqrt(((Explosion[i].CenterCoords[0] - xCoord) * (Explosion[i].CenterCoords[0] - xCoord)) + ((Explosion[i].CenterCoords[1] - yCoord) * (Explosion[i].CenterCoords[1] - yCoord)));
+          if(Distance > max(Explosion[i].BigRad, Radius))
+          {
+            WhileCheck = false;
+          }
+          else
+          {
+            WhileCheck = true;
+            break;
+          }
+        }
+        else
+        {
+          WhileCheck = false;
+        }
+      }
+      Serial.println("LoopDaLoop");
+      if((millis() - LoopDaLoopStartTime) > (LoopTime * 5))
+      {
+        Serial.println("Too many loops");
+        return;
+      }
+    } while(WhileCheck);
+    Explosion[Num].CenterCoords[0] = xCoord;
+    Explosion[Num].CenterCoords[1] = yCoord;
+    Explosion[Num].BigRad = Radius;
+    Explosion[Num].Duration = random(2, 5) * 1000;
+    Explosion[Num].ActiveTime = 0;
+    Explosion[Num].Active = 1;
+    //Dump_Explosion(Num);
+  }
+}
+
+void Deactivate_Explosion(int Num)
+{
+  Explosion[Num].Active = 0;
+  Explosion[Num].DetectHit = false;
+  Explosion[Num].CenterCoords[0] = -64;
+  Explosion[Num].CenterCoords[1] = -64;
+  Explosion[Num].BigRad = 0;
+  Explosion[Num].SmallRad = 0;
+  Explosion[Num].Duration = 0;
+  Explosion[Num].ActiveTime = 0;
+}
+
+void Display_Explosion(int Num)
+{
+  if(Explosion[Num].Active)
+  {
+    Explosion[Num].ActiveTime += LoopTime;
+    if(Explosion[Num].ActiveTime < Explosion[Num].Speed)
+    {
+      //Serial.println("Display 1");
+      Explosion[Num].SmallRad = Explosion[Num].ActiveTime * Explosion[Num].BigRad / Explosion[Num].Speed;
+      u8g2.drawCircle(Explosion[Num].CenterCoords[0], Explosion[Num].CenterCoords[1], Explosion[Num].SmallRad);
+      u8g2.drawCircle(Explosion[Num].CenterCoords[0], Explosion[Num].CenterCoords[1], Explosion[Num].BigRad);
+    }
+    else if(Explosion[Num].ActiveTime < (Explosion[Num].Duration + Explosion[Num].Speed))
+    {
+      //Serial.println("Display 2");
+      Explosion[Num].DetectHit = true;
+      int AnimationOn = (Explosion[Num].ActiveTime % (Explosion[Num].AnimationSpeed * 2)) / Explosion[Num].AnimationSpeed;
+      int Radius = Explosion[Num].BigRad - AnimationOn;
+      u8g2.drawDisc(Explosion[Num].CenterCoords[0], Explosion[Num].CenterCoords[1], Radius);
+    }
+    else
+    {
+      Deactivate_Explosion(Num);
+      return;
+    }
+  }
+  else
+  {
+    //Serial.println("Display 0");
+    return;
+  }
+}
+
+void Draw_Explosions()
+{
+  int Total = ExplosionsMax;
+  for(int i = 0; i < Total; i++)
+  {
+    Display_Explosion(i);
+  }
+}
 
 
 

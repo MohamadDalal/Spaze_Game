@@ -5,6 +5,10 @@ void Reset_Game()
 {
   GameTime = 0;                             // Reset the game time, as we have left the game
   Deactivate_Laser();                       // Deactivate the lasers
+  for(int i = 0; i < ExplosionsMax; i++)
+  {
+    Deactivate_Explosion(i);
+  }
 }
 
 // When the game is done, make a way to calculate score and display it in the game over screen

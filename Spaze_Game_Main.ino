@@ -86,6 +86,7 @@ int LastMenu = 0;           // Used to know which menu the program has been run 
 int LastSubMenu = 0;        // Used to know which sub menu the program has been run from, in case it needs to return to that sub menu
 
 int BigLaser = 0;               // Delete later, only used for testing
+int Weapon = 0;
 
 void setup()
 {
@@ -423,6 +424,8 @@ void loop()
         Menu = 1;
         SubMenu = 1;
         MenuCursor = 0;
+
+        Weapon = (Weapon + 1) % 2;
         
         //ShipSetup();                              // Reset the sprites position. No longer needed after making a proper pause menu
         //delay(100);
@@ -449,13 +452,29 @@ void loop()
       else if(RB_Press())                         // Check if the right button has been pressed. Everything here is for testing, the right button will be used to pause the game
       {
         Serial.println("RB_Pressed in game");
-        //UseYaw = !UseYaw;                         // Switch to Yaw mode (This is now in the settings menu)
-        //Activate_Laser(0, 32, 16, 4000);
-        BigLaser = (BigLaser + 1) % 2;              // Change the value for firing a big laser
-        Serial.print("BigLaser ");
-        Serial.println(BigLaser);
-        Activate_Laser_Random(BigLaser);            // Fire a laser with random settings
-        //Dump_Laser(Laser);
+        switch(Weapon)
+        {
+          case 0:                                       // Fire Laser
+            //Activate_Laser(0, 32, 16, 4000);
+            BigLaser = (BigLaser + 1) % 2;              // Change the value for firing a big laser
+            Serial.print("BigLaser ");
+            Serial.println(BigLaser);
+            Activate_Laser_Random(BigLaser);            // Fire a laser with random settings
+            break;
+          case 1:                                       // Make explosion
+            Serial.println("Megumin says: EXUPLOSION");
+            Activate_Explosion_Random();
+            break;
+          default:
+            // Set the menu to the unknown error menu and reset the cursor
+            Menu = 2;
+            SubMenu = 0;
+            MenuCursor = 0;
+            
+            //delay(100);
+            delay(fpsDelay);                          // Run the fps delay
+            return;                                   // Return to the main loop  
+        }
       }
     }
     else if(SubMenu == 1)                       //Pause Menu
