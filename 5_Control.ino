@@ -153,8 +153,8 @@ bool RB_Press()
 bool Pause_Game()
 {
   Gyro_Read();                                  // Read the data from the gyroscope
-  if(az >1.5)
-  //if(ax > 1.5 or ay > 1.5 or az >1.5)           // Is there an acceleration stronger than 1.5g?
+  //if(az >1.5)
+  if(ax > 1.5 or ay > 1.5 or az >1.5)           // Is there an acceleration stronger than 1.5g?
   {
     return true;                                // If yes return true
   }
