@@ -1,3 +1,11 @@
+// Randomly generate between 0 and 1 with
+
+// Randomness of lasers is a function where the chance of a big laser increases, which decreases the chance of a small laser.
+// A laser will be fired every 10 seconds unless the machinegun is fired, which I think would be fired for 20 seconds at the start of each minute
+
+// The explosions will be up to 5 at the same time, where every 2 minutes the number of explosions increases. I will try to get the explosions to avoid the lasers, so they cover the area not covered by the lasers
+
+
 // Laser functions
 
 //int Big_Laser = 0;
@@ -8,7 +16,7 @@ struct Laser
   // Width is Right edge - Left coordinate
   int Height = 0;                             // Height of the laser, can be between 16 and 30. Laser 2 height is (16 <= Height <= 46 - Lasers[1].Height)
   int Duration = 0;                           // Duration it is active in milliseconds
-  //unsigned long StartTime = 0;                // Start time in millis{}. Not Needed anymore because if it is used the laser activation time will continue moving forward when the game is paused. Now its time is only increased when the diplay laser function is run, which only runs when the game is running.
+  //unsigned long StartTime = 0;              // Start time in millis{}. Not Needed anymore because if it is used the laser activation time will continue moving forward when the game is paused. Now its time is only increased when the diplay laser function is run, which only runs when the game is running.
   unsigned long ActiveTime = 0;               // Store a millis value here to compare with Duration
   int AnimationSpeed = 50;                    // Speed in which animation works in milliseconds
   int LaserSpeed = 500;                       // Time the laser takes to reach the end of the screen in milliseconds
@@ -150,3 +158,77 @@ void Display_Laser()
 
 
 // Explosions function
+
+
+
+
+// Hitting functions
+unsigned long LastHitTime = 0;
+
+void Record_Hit()
+{
+  if(Player.Type == 0)
+  {
+    return;
+  }
+  else
+  {
+    Player.Health -= 1;
+    LastHitTime = millis();
+  }
+}
+
+void Check_Invincible()
+{
+  if((millis() - LastHitTime) > 2000)
+  {
+    Serial.println("Not Invincible");
+    Player.Type = 1;
+    Player.Color = 2; 
+  }
+  else
+  {
+    Serial.println("Invincible");
+    Serial.print("Color is ");
+    Serial.println(Player.Color);
+    Player.Type = 0;
+    Player.Color = ((millis() - LastHitTime) % 500) / 250;
+    
+  }
+}
+
+void Laser_Detect_Hit()
+{
+  if(Laser.Active == 0)
+  {
+    return;
+  }
+  else
+  {
+    if((Player.TopLeftCoords[1] < (Laser.TopLeftCoords[1] + Laser.Height)) and (Player.BottomRightCoords[1] > Laser.TopLeftCoords[1]) and (Player.BottomRightCoords[0] > (Laser.TopLeftCoords[0] - 1)))
+    {
+      //Serial.println("Laser hit recorded");
+      Record_Hit();
+    }
+    else
+    {
+      //Serial.println("Laser hit not recorded");
+      return;
+    }
+  }
+}
+
+void Detect_Hit()
+{
+  //Serial.println("Detect Hit Ran");
+  if(Player.Type == 0)
+  {
+    //Serial.println("Detect Hit Ran 1");
+    return;
+  }
+  else
+  {
+    //Serial.println("Detect Hit Ran 2");
+    Laser_Detect_Hit();
+  }
+}

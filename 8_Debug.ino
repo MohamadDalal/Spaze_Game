@@ -9,6 +9,8 @@ void ShipDataDump(struct Ship obj)
   Serial.println(obj.Health);
   Serial.print("Number of bitmaps is ");
   Serial.println(obj.BitmapNum);
+  Serial.print("The color of the ship is");
+  Serial.println(obj.Color);
   
   Serial.println("Bitmap data:");
   for (int i; i<4; i++)

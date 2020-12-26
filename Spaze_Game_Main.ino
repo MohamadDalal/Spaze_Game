@@ -408,6 +408,8 @@ void loop()
     if(SubMenu == 0)                          // Ingame
     {
       GameTime += LoopTime;                     // Calculate the time that the game session has been running
+      Detect_Hit();
+      Check_Invincible();
       u8g2.clearBuffer();                       // Clear the buffer before sending the visuals
       Game_HUD();                               // Run the HUD displaying function
       Game_Screen();                            // Run the Game displaying function.
@@ -500,7 +502,7 @@ void loop()
             SubMenu = 0;
             MenuCursor = 0;
             
-            GameTime = 0;                             // Reset the game time, as we have left the game
+            Reset_Game();                             // Reset the game varaibles
             FromPause = false;                        // Reset the value, as we are now in the main menu
             //delay(100);
             delay(fpsDelay);                          // Run the fps delay

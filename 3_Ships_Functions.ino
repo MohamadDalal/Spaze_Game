@@ -8,6 +8,7 @@ struct Ship
   //------------------------------Visual Data--------------------------------//
   int TopLeftCoords[2];       // Coordinates of top left pixel first is x then is y
   int BottomRightCoords[2];   // Coordinates of the bottom right pixle, first is x then is y. This is taken to know how high and wide the ship is
+  int Color;                  // Sets the color of the ship (0 black, 1 white, 2 inverted on the background)
   int BitmapNum;              // Amount of bitmaps to be used. sprite might be split in different parts. Currently capped at 3
   //int HitboxNum;            // Number of hitboxes // Decided to tie hitboxes to bitmaps, will be added if needed
   int BitmapData1[4];         // [x position relative to TopLeftCoords, y position relative to TopLeftCoords, Width, Height]
@@ -21,8 +22,6 @@ struct Ship
 //--------------------------------------------------Initializing structs--------------------------------------------
 struct Ship Player;
 //struct Ship Enemy[3];
-//CreateShip(/*obj*/Player,/*Type*/ 0,/*spd*/ 10,/*HP*/ 5,/*LUx*/ 26,/*LUy*/ 32,/*BMNo*/ 2,/*BMA1*/ 1,/*BMA2*/ 2,/*BMA3*/ 0,/*BMx1*/ 0,/*BMy1*/ 0,/*BMx2*/ 2,/*BMy2*/ 1,/*BMx3*/ 0,/*BMy3*/ 0);
-//Does not like running functions in global area
 //----------------------------------------------------------------------------------------------------------------
 
 
@@ -30,7 +29,7 @@ struct Ship Player;
 // Fills in the struct (Struct to fill, Type, speed, health, LUx and LUy = Left Upper corner coordinates, BMNo = Number of bitmaps, BMA = BitmapAddress, BMx and BMy = bitmap x and y relative to top left of sprite)
 // If the bitmap is not going to be used, then the address and the coordinates are to be left as 0
 // Use the bitmaps in order, so if only one bitmap is needed, then it has to be the first one
-struct Ship CreateShip(struct Ship obj, int Type, int spd, int hp, int LUx, int LUy, int BMNo, int BMA1, int BMA2, int BMA3, int BM1x, int BM1y, int BM2x, int BM2y, int BM3x, int BM3y)
+struct Ship CreateShip(struct Ship obj, int Type, int spd, int hp, int LUx, int LUy, int Col, int BMNo, int BMA1, int BMA2, int BMA3, int BM1x, int BM1y, int BM2x, int BM2y, int BM3x, int BM3y)
 {
   //Serial.println("CreateShip function ran");
   obj.Type = Type;
@@ -39,6 +38,7 @@ struct Ship CreateShip(struct Ship obj, int Type, int spd, int hp, int LUx, int 
   obj.BitmapNum = BMNo;
   obj.TopLeftCoords[0] = LUx;
   obj.TopLeftCoords[1] = LUy;
+  obj.Color = Col;
   // Assign data for first bitmap
   obj.PntBitmap1 = Get_Bitmap(BMA1);  obj.BitmapData1[0] = BM1x;  obj.BitmapData1[1] = BM1y;  obj.BitmapData1[2] = TBmP[0];  obj.BitmapData1[3] = TBmP[1];
   int BM1RightCoord = BM1x + TBmP[0];         // Get the Rightmost pixel of the bitmap in relation to the LeftUpper point of the sprite
@@ -89,13 +89,13 @@ void ShipSetup()
     PlayerBMx2 = 3;
   }
   // Create the ships by running create ship function
-  Player = CreateShip(/*obj*/Player,/*Type*/ 1,/*spd*/ 150,/*HP*/ 5,/*LUx*/ 26,/*LUy*/ 32,/*BMNo*/ 2,/*BMA1*/ 1,/*BMA2*/ 2,/*BMA3*/ 0,/*BMx1*/ PlayerBMx1,/*BMy1*/ 0,/*BMx2*/ PlayerBMx2,/*BMy2*/ 2,/*BMx3*/ 0,/*BMy3*/ 0);
+  Player = CreateShip(/*obj*/Player,/*Type*/ 1,/*spd*/ 150,/*HP*/ 5,/*LUx*/ 26,/*LUy*/ 32, /*Col*/ 2,/*BMNo*/ 2,/*BMA1*/ 1,/*BMA2*/ 2,/*BMA3*/ 0,/*BMx1*/ PlayerBMx1,/*BMy1*/ 0,/*BMx2*/ PlayerBMx2,/*BMy2*/ 2,/*BMx3*/ 0,/*BMy3*/ 0);
 }
 
 // Draws a ship with max 3 bitmaps
 void DrawShipXBM(struct Ship obj)
 {
-  u8g2.setDrawColor(2);               // Set the color so that the ship is white on black background and black on white backgrounds
+  u8g2.setDrawColor(obj.Color);               // Set the color so that the ship is white on black background and black on white backgrounds
   switch(obj.BitmapNum)
   {
     //drawXBM args: x position, y position, width, height, bitmap array
@@ -122,5 +122,5 @@ void DrawShipXBM(struct Ship obj)
       Menu = 2;
       SubMenu = 0;
   }
-  u8g2.setDrawColor(1);               // Set the color back to only black
+  u8g2.setDrawColor(1);               // Set the color back to only white
 }
