@@ -6,7 +6,9 @@
 // The explosions will be up to 5 at the same time, where every 2 minutes the number of explosions increases. I will try to get the explosions to avoid the lasers, so they cover the area not covered by the lasers
 
 
-// Laser functions
+// Constants declarations
+
+// Laser constants
 
 //int Big_Laser = 0;
 struct Laser
@@ -27,6 +29,61 @@ struct Laser
   // If the decoration is a horizontal line, then use lasers left coordinate and width to draw it. Y-coordinate changes with a tick function
 };
 struct Laser Laser;                           // Create the laser struct
+
+// Vertical moving laser constants
+
+struct VertLaser
+{
+  //------------------------------Inner Data---------------------------------//
+  bool Active = false;                           // false = Don't show. true = Show
+  bool Shooting = false;                         // false = Not shooting, true = Shooting
+  int SummonTime = 1000;
+  int WarningTime = 2000;
+  int Speed = 0;
+  int FireTime = 0;
+  int SafeTime = 0;
+  //int FirePixles = 48;
+  //int SafePixles = 16;
+  int Loops = 0;
+  int ActiveTime = 0;
+  //int ChangeTime = 0;
+  float MoveVert = 0;
+  int MoveDir = 0;
+  //int PixelsMoved = 0;
+  //int ChangePixel = 0;
+  
+  //------------------------------Visual Data--------------------------------//
+  int TopLeftCoords[2] = {-64, -64};      // Coordinates of top left pixel first is x then is y
+  //int BottomRightCoords[2];               // Coordinates of the bottom right pixle, first is x then is y. This is taken to know how high and wide the ship is
+  int Color = 1;                          // Sets the color of the ship (0 black, 1 white, 2 inverted on the background)
+  int BitmapData[2];                      // [Width, Height]
+  // Bitmap pointers will be assigned using a function. All bitmaps will be stored in one place.
+  unsigned char *PntBitmap;               // Pointer to first bitmap
+};
+struct VertLaser VertLaser;
+
+// Explosions constants
+
+const int ExplosionsMax = 10;                                                           // The maximum amount of explosions allowed (If there is place for them)
+
+struct Explosion
+{
+  int Active = 0;                                                                       // If the explosion is active this is 1 (Used for various checks)
+  bool DetectHit = false;                                                               // This is true if the explosion is to deal damage. Made so the explosion does not deal damage while the warning animation is happening
+  int CenterCoords[2] = {-64, -64};                                                     // The poisition of the center of the explosion. Initially somewhere far away from the screens boundaries
+  int BigRad = 0;                                                                       // The radius of the explosion
+  int SmallRad = 0;                                                                     // The radius of the small circle used for the warning animation
+  int Duration = 0;                                                                     // The duration of the explosion, does not count the warning time in it
+  int ActiveTime = 0;                                                                   // The time that the explosion has been active
+  int Speed = 1000;                                                                     // The time it takes for the warning to finish. Or the speed of which the explosion goes off
+  int AnimationSpeed = 200;                                                             // The speed of the animation, where the explosion's radius becomes smaller by a pixel and back to original size
+};
+struct Explosion Explosion[ExplosionsMax];                                              // An array with all the explosions. Since this is only made at the start, then the ExplosionMax variable cannot be bigger than what it was at the start of the program
+
+
+// Functions to activate and show the hazards
+
+// Laser functions
 
 // These functions setup one laser to be fired, the random function either sets up a smal laser that can be spawned anywhere, or a big laser that covers either the top or the bottom of the screen
 
@@ -63,7 +120,7 @@ void Deactivate_Laser()
 // This function activates either a big or a small laser with random values. The size will also become random when I finish testing
 void Activate_Laser_Random(int Size)
 {
-  if(Laser.Active)
+  if(Laser.Active or VertLaser.Active)
   {
     return;
   }
@@ -153,52 +210,198 @@ void Display_Laser()
 }
 
 
-// Machine gun functions
+// Vertically Moving Laser functions
 
+void Activate_VertLaser(int Spd, float FirePxl, float SafePxl, int Loops, int SummonPos, int Dir)
+{
+  if(VertLaser.Active)
+  {
+    return;
+  }
+  else
+  {
+    VertLaser.Active = true;
+    VertLaser.Speed = Spd;
+    VertLaser.FireTime = 1000 * (FirePxl / VertLaser.Speed);
+    VertLaser.SafeTime = 1000 * (SafePxl / VertLaser.Speed);
+    //VertLaser.FirePixels = FirePxl;
+    //VertLaser.SafePixels = SafePxl;
+    VertLaser.Loops = Loops;
+    VertLaser.MoveDir = Dir;
+    VertLaser.TopLeftCoords[1] = SummonPos;
+    VertLaser.TopLeftCoords[0] = 128;
+    VertLaser.PntBitmap = Get_Bitmap(3);
+    VertLaser.BitmapData[0] = TBmP[0];
+    VertLaser.BitmapData[1] = TBmP[1];
+    VertLaser.ActiveTime = 0;
+  }
+}
+
+void Activate_VertLaser_Random()
+{
+  if(VertLaser.Active or Laser.Active)
+  {
+    return;
+  }
+  else
+  {
+    VertLaser.Active = true;
+    VertLaser.Speed = random(25, 101);
+    float FirePxl = random(32, 45);
+    float SafePxl = random(16, 33);
+    VertLaser.FireTime = 1000 * (FirePxl / VertLaser.Speed);
+    VertLaser.SafeTime = 1000 * (SafePxl / VertLaser.Speed);
+    //VertLaser.FirePixels = FirePxl;
+    //VertLaser.SafePixels = SafePxl;
+    VertLaser.Loops = random(2, 7);
+    int MoveDirHelper = random(0, 2);
+    VertLaser.MoveDir = (MoveDirHelper * 2) - 1;                                  // If MoveDirHelper is 0 then move direction is up (-1), if it is one then the direction is down (1)
+    VertLaser.TopLeftCoords[1] = random(0, 57);                                  // The upper boundary is 128 - the bitmaps height
+    VertLaser.TopLeftCoords[0] = 128;
+    VertLaser.PntBitmap = Get_Bitmap(3);
+    VertLaser.BitmapData[0] = TBmP[0];
+    VertLaser.BitmapData[1] = TBmP[1];
+    VertLaser.ActiveTime = 0;
+    Serial.println("Random laser activated");
+  }
+}
+
+void Deactivate_VertLaser()
+{
+  VertLaser.Active = false;
+  VertLaser.Shooting = false;
+  VertLaser.Speed = 0;
+  VertLaser.FireTime = 0;
+  VertLaser.SafeTime = 0;
+  //VertLaser.FirePixels = FirePxl;
+  //VertLaser.SafePixels = SafePxl;
+  VertLaser.Loops = 0;
+  VertLaser.MoveDir = 0;
+  VertLaser.TopLeftCoords[1] = -64;
+  VertLaser.TopLeftCoords[0] = -64;
+  VertLaser.Color = 1;
+  VertLaser.ActiveTime = 0;
+}
+
+void Display_VertLaser()
+{
+  if(VertLaser.Active)
+  {
+    //Serial.print("The duration is ");
+    Serial.print("Display_VertLaser ");
+    int MoveVertInt;
+    float fps = 1000 / LoopTime;
+    //Serial.println(VertLaser.MoveDir * (VertLaser.Speed / fps));
+    VertLaser.ActiveTime += LoopTime;
+    if(VertLaser.ActiveTime < VertLaser.SummonTime)                                                                                                 // Summon time
+    {
+      Serial.println("1");
+      VertLaser.TopLeftCoords[0] = 128 - ((VertLaser.ActiveTime * (128 - 122)) / VertLaser.SummonTime);
+      u8g2.drawXBM(VertLaser.TopLeftCoords[0], VertLaser.TopLeftCoords[1], VertLaser.BitmapData[0], VertLaser.BitmapData[1], VertLaser.PntBitmap);
+      u8g2.setDrawColor(0);
+      u8g2.drawPixel((VertLaser.TopLeftCoords[0] - 1), (VertLaser.TopLeftCoords[1] + 3));
+      u8g2.setDrawColor(1);
+    }
+    else if(VertLaser.ActiveTime < VertLaser.WarningTime)                                                                                           // Warning time
+    {
+      Serial.println("2");
+      VertLaser.TopLeftCoords[0] = 122;
+      VertLaser.MoveVert += VertLaser.MoveDir * (VertLaser.Speed / fps);
+      MoveVertInt = VertLaser.MoveVert;
+      if (((VertLaser.TopLeftCoords[1] + MoveVertInt) > (63 - VertLaser.BitmapData[1])) or ((VertLaser.TopLeftCoords[1] + MoveVertInt) < 0))        // Exceeds boundaries
+      {
+        VertLaser.MoveVert = 0;
+        VertLaser.MoveDir = -VertLaser.MoveDir;
+      }
+      else
+      {
+        VertLaser.TopLeftCoords[1] += MoveVertInt;
+        VertLaser.MoveVert -= MoveVertInt;
+      }
+      u8g2.drawXBM(VertLaser.TopLeftCoords[0], VertLaser.TopLeftCoords[1], VertLaser.BitmapData[0], VertLaser.BitmapData[1], VertLaser.PntBitmap);
+      u8g2.setDrawColor(0);
+      u8g2.drawPixel((VertLaser.TopLeftCoords[0] - 1), (VertLaser.TopLeftCoords[1] + 3));
+      u8g2.setDrawColor(1);
+    }
+    else if(VertLaser.ActiveTime > ((1000 * VertLaser.Loops * (116.0 / VertLaser.Speed)) + VertLaser.SummonTime))                                                                    // Went through all the loops. The constant is 116, cause that's the number of pixels that the laser crosses in a loop (12 pixels due to the 3 height difference)
+    {
+      if(VertLaser.ActiveTime < ((1000 * VertLaser.Loops * (116.0 / VertLaser.Speed)) + (2 * VertLaser.SummonTime)))
+      {
+        Serial.println("5");
+        VertLaser.Shooting = false;
+        int TempModulus = (1000 * VertLaser.Loops * (116.0 / VertLaser.Speed)) + VertLaser.SummonTime;
+        //Serial.println(VertLaser.ActiveTime);
+        //Serial.println(TempModulus);
+        //Serial.println(((VertLaser.ActiveTime % TempModulus) * (129 - 122)) / VertLaser.SummonTime);
+        VertLaser.TopLeftCoords[0] = 122 + (((VertLaser.ActiveTime % TempModulus) * (129 - 122)) / VertLaser.SummonTime);
+        u8g2.drawXBM(VertLaser.TopLeftCoords[0], VertLaser.TopLeftCoords[1], VertLaser.BitmapData[0], VertLaser.BitmapData[1], VertLaser.PntBitmap);
+        u8g2.setDrawColor(0);
+        u8g2.drawPixel((VertLaser.TopLeftCoords[0] - 1), (VertLaser.TopLeftCoords[1] + 3));
+        u8g2.setDrawColor(1);
+      }
+      else
+      {
+        Serial.println("6");
+        Dump_VertLaser();
+        Deactivate_VertLaser();
+        return;
+      }
+    }
+    else
+    {
+      if(((VertLaser.ActiveTime - VertLaser.WarningTime) % (VertLaser.FireTime + VertLaser.SafeTime)) < VertLaser.FireTime)                         // Shooting
+      {
+        Serial.println("3");
+        VertLaser.Shooting = true;
+        VertLaser.TopLeftCoords[0] = 122;
+        VertLaser.MoveVert += VertLaser.MoveDir * (VertLaser.Speed / fps);
+        MoveVertInt = VertLaser.MoveVert;
+        if (((VertLaser.TopLeftCoords[1] + MoveVertInt) > (63 - VertLaser.BitmapData[1])) or ((VertLaser.TopLeftCoords[1] + MoveVertInt) < 0))                                    // Exceeds boundaries
+        {
+          VertLaser.MoveVert = 0;
+          VertLaser.MoveDir = -VertLaser.MoveDir;
+        }
+        else
+        {
+          VertLaser.TopLeftCoords[1] += MoveVertInt;
+          VertLaser.MoveVert -= MoveVertInt;
+        }
+        u8g2.drawXBM(VertLaser.TopLeftCoords[0], VertLaser.TopLeftCoords[1], VertLaser.BitmapData[0], VertLaser.BitmapData[1], VertLaser.PntBitmap);
+        u8g2.drawHLine(13, (VertLaser.TopLeftCoords[1] + 3), 115);
+      }
+      else
+      {
+        Serial.println("4");
+        VertLaser.Shooting = false;
+        VertLaser.TopLeftCoords[0] = 122;
+        VertLaser.MoveVert += VertLaser.MoveDir * (VertLaser.Speed / fps);
+        MoveVertInt = VertLaser.MoveVert;
+        if (((VertLaser.TopLeftCoords[1] + MoveVertInt) > (63 - VertLaser.BitmapData[1])) or ((VertLaser.TopLeftCoords[1] + MoveVertInt) < 0))                                    // Exceeds boundaries
+        {
+          VertLaser.MoveVert = 0;
+          VertLaser.MoveDir = -VertLaser.MoveDir;
+        }
+        else
+        {
+          VertLaser.TopLeftCoords[1] += MoveVertInt;
+          VertLaser.MoveVert -= MoveVertInt;
+        }
+        u8g2.drawXBM(VertLaser.TopLeftCoords[0], VertLaser.TopLeftCoords[1], VertLaser.BitmapData[0], VertLaser.BitmapData[1], VertLaser.PntBitmap);
+        u8g2.setDrawColor(0);
+        u8g2.drawPixel((VertLaser.TopLeftCoords[0] - 1), (VertLaser.TopLeftCoords[1] + 3));
+        u8g2.setDrawColor(1);
+      }
+    }
+  }
+  else
+  {
+    return;
+  }
+}
 
 
 
 // Explosions function
-const int ExplosionsMax = 10;                                                           // The maximum amount of explosions allowed (If there is place for them)
-
-struct Explosion
-{
-  int Active = 0;                                                                       // If the explosion is active this is 1 (Used for various checks)
-  bool DetectHit = false;                                                               // This is true if the explosion is to deal damage. Made so the explosion does not deal damage while the warning animation is happening
-  int CenterCoords[2] = {-64, -64};                                                     // The poisition of the center of the explosion. Initially somewhere far away from the screens boundaries
-  int BigRad = 0;                                                                       // The radius of the explosion
-  int SmallRad = 0;                                                                     // The radius of the small circle used for the warning animation
-  int Duration = 0;                                                                     // The duration of the explosion, does not count the warning time in it
-  int ActiveTime = 0;                                                                   // The time that the explosion has been active
-  int Speed = 1000;                                                                     // The time it takes for the warning to finish. Or the speed of which the explosion goes off
-  int AnimationSpeed = 200;                                                             // The speed of the animation, where the explosion's radius becomes smaller by a pixel and back to original size
-};
-struct Explosion Explosion[ExplosionsMax];                                              // An array with all the explosions. Since this is only made at the start, then the ExplosionMax variable cannot be bigger than what it was at the start of the program
-
-// Print the data of the explosion in the terminal
-void Dump_Explosion(int Num)
-{
-  Serial.print("Dumping explosion number ");
-  Serial.println(Num);
-  Serial.print("Acive? "); 
-  Serial.println(Explosion[Num].Active);
-  Serial.print("X Coordinate ");
-  Serial.println(Explosion[Num].CenterCoords[0]);
-  Serial.print("Y Coordinate ");
-  Serial.println(Explosion[Num].CenterCoords[1]);
-  Serial.print("Big Circle Radius ");
-  Serial.println(Explosion[Num].BigRad);
-  Serial.print("Small Circle Radius ");
-  Serial.println(Explosion[Num].SmallRad);
-  Serial.print("Duration ");
-  Serial.println(Explosion[Num].Duration);
-  Serial.print("Active Time ");
-  Serial.println(Explosion[Num].ActiveTime);
-  Serial.print("Speed ");
-  Serial.println(Explosion[Num].Speed);
-  Serial.print("Animation Speed ");
-  Serial.println(Explosion[Num].AnimationSpeed);
-}
 
 // Activate and explosion with preset values. Arguments(Which explosion in the array to activate, xPosition of the center, yPosition of the center, Radius of the big circle, Duration of the explosion)
 void Activate_Explosion(int Num, int xPos, int yPos, int Rad, int Duration)
@@ -643,6 +846,29 @@ void Laser_Detect_Hit()
       //Serial.println("Laser hit not recorded");
       return;                                                                     // Ma boi ain't hit
     }
+  }
+}
+
+void VertLaser_Hit_Detect()
+{
+  if(Player.Type == 0)
+  {
+    return;
+  }
+  else if(VertLaser.Active)
+  {
+    if((Player.TopLeftCoords[1] >= (VertLaser.TopLeftCoords[1] + 3)) and (Player.BottomRightCoords[1] <= (VertLaser.TopLeftCoords[1] + 3)))
+    {
+      Record_Hit();
+    }
+    else
+    {
+      return;
+    }
+  }
+  else
+  {
+    return;
   }
 }
 

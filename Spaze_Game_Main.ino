@@ -425,7 +425,7 @@ void loop()
         SubMenu = 1;
         MenuCursor = 0;
 
-        Weapon = (Weapon + 1) % 2;
+        Weapon = (Weapon + 1) % 3;
         
         //ShipSetup();                              // Reset the sprites position. No longer needed after making a proper pause menu
         //delay(100);
@@ -464,6 +464,10 @@ void loop()
           case 1:                                       // Make explosion
             Serial.println("Megumin says: EXUPLOSION");
             Activate_Explosion_Random();
+            break;
+          case 2:
+            Serial.println("How about a moving laser?");
+            Activate_VertLaser_Random();
             break;
           default:
             // Set the menu to the unknown error menu and reset the cursor

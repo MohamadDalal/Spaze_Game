@@ -255,8 +255,9 @@ void Game_HUD()
 void Game_Screen()
 {
   //u8g2.clearBuffer();
-  Draw_Explosions();
+  Draw_Explosions();                                  // Draw any active explosions
   Display_Laser();                                    // Check if a laser needs to be drawn and draw it
+  Display_VertLaser();                                // Check if a vertical laser needs to be drawn and draw it
   DrawShipXBM(Player);                                // Draw the player's ship
   //u8g2.drawCircle(100, 25, 10, U8G2_DRAW_ALL);
   //u8g2.sendBuffer();
