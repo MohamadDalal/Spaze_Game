@@ -37,7 +37,7 @@ void Menu_Navigation()
   }
 }
 
-// Function to navigate through the pages using gyroscope and tilting motion. Uses the same millis check as the menu navigation, since these two function don't run in the same menu
+// Function to navigate through the pages using gyroscope and tilting motion. Uses the same millis check as the menu navigation, since these two function don't run in the same menu (Pages have not been implemented yet)
 void Page_Navigation(int PageCount)
 {
   if(gy > 150)                                  // Check if the device has been tilted down, by checking for high y-axis positive rotation speed
@@ -64,7 +64,7 @@ void Page_Navigation(int PageCount)
   }
 }
 
-// Function to check if the left button has been pressed
+// Function to check if the left button has been pressed (Right button if inverted)
 bool LB_Press()
 {
   //Serial.println("LB_Press Ran");
@@ -106,7 +106,7 @@ bool LB_Press()
   }
 }
 
-// Function to check if the right button has been pressed
+// Function to check if the right button has been pressed (Left button if inverted)
 bool RB_Press()
 {
   if((millis() - RBLastRan) < 250)              // Check if the right button has been registered in the last 250ms, if so then don't register this press
@@ -153,8 +153,8 @@ bool RB_Press()
 bool Pause_Game()
 {
   Gyro_Read();                                  // Read the data from the gyroscope
-  //if(az >1.5)
-  if(ax > 1.5 or ay > 1.5 or az >1.5)           // Is there an acceleration stronger than 1.5g?
+  if(az >1.5)
+  //if(ax > 1.5 or ay > 1.5 or az >1.5)           // Is there an acceleration stronger than 1.5g?
   {
     return true;                                // If yes return true
   }
@@ -166,7 +166,7 @@ bool Pause_Game()
 
 // The comments for all moving functions are at the start of the Yaw moving function. I am not commenting all 6 almost identical procedures
 // This function reads the Pitch rotation adjusted with the calibrators to detect vertical movement
-// The way the pixles are moved is explained in a paper somewhere in my Linear Algebra notebook
+// // The way the pixles are moved is explained in a paper somewhere in my Linear Algebra notebook
 void Game_Move_Vert()
 {
   int MoveVertInt;
@@ -442,7 +442,7 @@ void Game_Move_Yaw_Hor()
     }
     else                                                        // If it is between the two deadzones
     {
-      MoveHor -= ((Yaw - RollYawDZMin)/(RollYawDZMax - RollYawDZMin)) * (Speed / fps);    // Make a linear ration from the angle and mutiply it with the speed
+      MoveHor -= ((Yaw - RollYawDZMin)/(RollYawDZMax - RollYawDZMin)) * (Speed / fps);    // Make a linear ratio from the angle and mutiply it with the speed
       //MoveHor -= ((Yaw - RollYawDZMin)/(RollYawDZMax - RollYawDZMin)) * (Speed / (1000 / LoopTime));
       
       // This is literally the same lines as above, just read the comments above

@@ -42,6 +42,13 @@ unsigned char * Get_Bitmap(int Num)
       PTBmP--;       //Go back to width field
       static unsigned char Bitmap2[] = {0x1d, 0x22, 0x1d};
       return Bitmap2;
+    case 3:           // Vertical laser shooting thing bitmap
+      *PTBmP = 6;    //Assign width of bitmap
+      PTBmP++;       //Go up to height field
+      *PTBmP = 7;    //Assign height of bitmap
+      PTBmP--;       //Go back to width field
+      static unsigned char Bitmap3[] = {0x38, 0x04, 0x12, 0x2f, 0x12, 0x04, 0x38};
+      return Bitmap3;
     default:
       Serial.println("Bitmap out of range");
       return Bitmap0;

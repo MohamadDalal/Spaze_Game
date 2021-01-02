@@ -65,6 +65,7 @@ int Menu = 0;               // Menu 0 is main menu, menu 1 is game menu, menu 2 
 //int ErrorMenu = 0;        // Menu 0 is an error with no error, menu 1 is no gyroscope error.
 int SubMenu = 0;            // SubMenu for the Menues, it all depends on the Main Menu value
 int Page = 0;               // The page of multi paged menues
+int level = 0;              // Changes how the game plays, more level = harder hazards
 bool FromPause = false;     // Checks if this menu has been accessed from the pause menu and not the main menu (This is on when the game is paused and off when in the main menu)
 /*--------------------------------Sub Menus------------------------------------------------------
       Menu 0                        Menu 1                      Menu 2
@@ -86,7 +87,7 @@ int LastMenu = 0;           // Used to know which menu the program has been run 
 int LastSubMenu = 0;        // Used to know which sub menu the program has been run from, in case it needs to return to that sub menu
 
 int BigLaser = 0;               // Delete later, only used for testing
-int Weapon = 0;
+int Weapon = 0;             // Onlt used for testing
 
 void setup()
 {

@@ -35,27 +35,21 @@ struct Laser Laser;                           // Create the laser struct
 struct VertLaser
 {
   //------------------------------Inner Data---------------------------------//
-  bool Active = false;                           // false = Don't show. true = Show
-  bool Shooting = false;                         // false = Not shooting, true = Shooting
-  int SummonTime = 1000;
-  int WarningTime = 2000;
-  int Speed = 0;
-  int FireTime = 0;
-  int SafeTime = 0;
-  //int FirePixles = 48;
-  //int SafePixles = 16;
-  int Loops = 0;
-  int ActiveTime = 0;
-  //int ChangeTime = 0;
-  float MoveVert = 0;
-  int MoveDir = 0;
-  //int PixelsMoved = 0;
-  //int ChangePixel = 0;
+  bool Active = false;                          // false = Don't show. true = Show
+  bool Shooting = false;                        // false = Not shooting, true = Shooting
+  int SummonTime = 1000;                        // The time in milliseconds it takes for the shooting thing to show up
+  int WarningTime = 2000;                       // The time in milliseconds it moves without shooting (This also counts the SummonTime with it)
+  int Speed = 0;                                // The speed of the vertical laser in pixels per second
+  int FireTime = 0;                             // The time in milliseconds that the vertical laser fires in
+  int SafeTime = 0;                             // The time in milliseconds that the vertical laser does not fire in
+  int Loops = 0;                                // The amount of loops that the vertical laser travels
+  int ActiveTime = 0;                           // The time that the vertical laser has been active
+  float MoveVert = 0;                           // This float is used to calculate th amount of pixels the vertical laser moves in each frame. This works the same way as the player moving function.
+  int MoveDir = 0;                              // This indicates the moving direction of the vertical laser (1 is down and -1 is up)
   
   //------------------------------Visual Data--------------------------------//
   int TopLeftCoords[2] = {-64, -64};      // Coordinates of top left pixel first is x then is y
-  //int BottomRightCoords[2];               // Coordinates of the bottom right pixle, first is x then is y. This is taken to know how high and wide the ship is
-  int Color = 1;                          // Sets the color of the ship (0 black, 1 white, 2 inverted on the background)
+  int Color = 1;                          // Sets the color of the Vertical laser (0 black, 1 white, 2 inverted on the background)
   int BitmapData[2];                      // [Width, Height]
   // Bitmap pointers will be assigned using a function. All bitmaps will be stored in one place.
   unsigned char *PntBitmap;               // Pointer to first bitmap
@@ -120,9 +114,9 @@ void Deactivate_Laser()
 // This function activates either a big or a small laser with random values. The size will also become random when I finish testing
 void Activate_Laser_Random(int Size)
 {
-  if(Laser.Active or VertLaser.Active)
+  if(Laser.Active or VertLaser.Active)                                    // Check if a laser or vertical laser is already active
   {
-    return;
+    return;                                                               // Don't activate the laser
   }
   else
   {
@@ -212,11 +206,12 @@ void Display_Laser()
 
 // Vertically Moving Laser functions
 
+// This function activates a verical laser with chosen parameters. Only used for testing specefic cases
 void Activate_VertLaser(int Spd, float FirePxl, float SafePxl, int Loops, int SummonPos, int Dir)
 {
-  if(VertLaser.Active)
+  if(VertLaser.Active)                                                  // If Vertical laser is already active
   {
-    return;
+    return;                                                             // Don't reactivate the vertical laser
   }
   else
   {
@@ -237,35 +232,37 @@ void Activate_VertLaser(int Spd, float FirePxl, float SafePxl, int Loops, int Su
   }
 }
 
+// This function activates a Vertical laser with random parameters
 void Activate_VertLaser_Random()
 {
-  if(VertLaser.Active or Laser.Active)
+  if(VertLaser.Active or Laser.Active)                                            // If vertical laser is already active
   {
-    return;
+    return;                                                                       // Don't reactivate the vertical laser
   }
   else
   {
-    VertLaser.Active = true;
-    VertLaser.Speed = random(25, 101);
-    float FirePxl = random(32, 45);
-    float SafePxl = random(16, 33);
-    VertLaser.FireTime = 1000 * (FirePxl / VertLaser.Speed);
-    VertLaser.SafeTime = 1000 * (SafePxl / VertLaser.Speed);
+    VertLaser.Active = true;                                                      // Set the vertical laser as active
+    VertLaser.Speed = random(25, 101);                                            // Give a speed. 100 being max, as that is 50 less than the player speed
+    float FirePxl = random(32, 45);                                               // Give it the number of pixels it fires
+    float SafePxl = random(16, 33);                                               // Give it the number of pixels it does not fire
+    VertLaser.FireTime = 1000 * (FirePxl / VertLaser.Speed);                      // Convert from pixels to milliseconds using the vertical lasers speed
+    VertLaser.SafeTime = 1000 * (SafePxl / VertLaser.Speed);                      // Convert from pixels to milliseconds using the vertical lasers speed
     //VertLaser.FirePixels = FirePxl;
     //VertLaser.SafePixels = SafePxl;
-    VertLaser.Loops = random(2, 7);
-    int MoveDirHelper = random(0, 2);
+    VertLaser.Loops = random(2, 7);                                               // Give the number of loops the laser goes in
+    int MoveDirHelper = random(0, 2);                                             // Temporary value to help randomize the direction it moves in at the start
     VertLaser.MoveDir = (MoveDirHelper * 2) - 1;                                  // If MoveDirHelper is 0 then move direction is up (-1), if it is one then the direction is down (1)
-    VertLaser.TopLeftCoords[1] = random(0, 57);                                  // The upper boundary is 128 - the bitmaps height
-    VertLaser.TopLeftCoords[0] = 128;
-    VertLaser.PntBitmap = Get_Bitmap(3);
-    VertLaser.BitmapData[0] = TBmP[0];
-    VertLaser.BitmapData[1] = TBmP[1];
-    VertLaser.ActiveTime = 0;
-    Serial.println("Random laser activated");
+    VertLaser.TopLeftCoords[1] = random(0, 57);                                   // Randomly place the start of vertical laser. The upper boundary is 64 - the bitmap's height
+    VertLaser.TopLeftCoords[0] = 128;                                             // Start the vertical laser right outside the left boundary
+    VertLaser.PntBitmap = Get_Bitmap(3);                                          // Initialize the vertical laser's bitmap
+    VertLaser.BitmapData[0] = TBmP[0];                                            // Get the bitmaps width (Refer to the Get_Bitmap() function to understand where this comes from)
+    VertLaser.BitmapData[1] = TBmP[1];                                            // Get the bitmaps height (Refer to the Get_Bitmap() function to understand where this comes from)
+    VertLaser.ActiveTime = 0;                                                     // Reset the active time to 0. This is just to be safe in case the deactivator fails to do this
+    //Serial.println("Random laser activated");
   }
 }
 
+// This function deactivates the vertical laser by resetting its values to their initial state (Except the bitmap)
 void Deactivate_VertLaser()
 {
   VertLaser.Active = false;
@@ -283,80 +280,82 @@ void Deactivate_VertLaser()
   VertLaser.ActiveTime = 0;
 }
 
+// This is the function used to display the vertical laser
 void Display_VertLaser()
 {
-  if(VertLaser.Active)
+  if(VertLaser.Active)                                                                                                                              // Check if the vertical laser is active
   {
-    //Serial.print("The duration is ");
-    Serial.print("Display_VertLaser ");
-    int MoveVertInt;
-    float fps = 1000 / LoopTime;
+    //Serial.print("Display_VertLaser ");
+    int MoveVertInt;                                                                                                                                // Local variable to round the MoveVert float into an integer
+    float fps = 1000 / LoopTime;                                                                                                                    // Get the current fps to be used in moving the vertical laser
     //Serial.println(VertLaser.MoveDir * (VertLaser.Speed / fps));
-    VertLaser.ActiveTime += LoopTime;
-    if(VertLaser.ActiveTime < VertLaser.SummonTime)                                                                                                 // Summon time
+    VertLaser.ActiveTime += LoopTime;                                                                                                               // Increase the active time using the loop time
+    if(VertLaser.ActiveTime < VertLaser.SummonTime)                                                                                                 // If the active time is less than the summon time
     {
-      Serial.println("1");
-      VertLaser.TopLeftCoords[0] = 128 - ((VertLaser.ActiveTime * (128 - 122)) / VertLaser.SummonTime);
-      u8g2.drawXBM(VertLaser.TopLeftCoords[0], VertLaser.TopLeftCoords[1], VertLaser.BitmapData[0], VertLaser.BitmapData[1], VertLaser.PntBitmap);
-      u8g2.setDrawColor(0);
-      u8g2.drawPixel((VertLaser.TopLeftCoords[0] - 1), (VertLaser.TopLeftCoords[1] + 3));
-      u8g2.setDrawColor(1);
+      //Serial.println("1");
+      VertLaser.TopLeftCoords[0] = 128 - ((VertLaser.ActiveTime * (128 - 122)) / VertLaser.SummonTime);                                             // Change the horizontal position of the laser using a linear function
+      u8g2.drawXBM(VertLaser.TopLeftCoords[0], VertLaser.TopLeftCoords[1], VertLaser.BitmapData[0], VertLaser.BitmapData[1], VertLaser.PntBitmap);  // Draw the bitmap
+      u8g2.setDrawColor(0);                                                                                                                         // Change the drawing color to black
+      u8g2.drawPixel((VertLaser.TopLeftCoords[0] - 1), (VertLaser.TopLeftCoords[1] + 3));                                                           // Draw a black pixel to be put over the left boundary line
+      u8g2.setDrawColor(1);                                                                                                                         // Return the drawing color to white
     }
-    else if(VertLaser.ActiveTime < VertLaser.WarningTime)                                                                                           // Warning time
+    else if(VertLaser.ActiveTime < VertLaser.WarningTime)                                                                                           // If the active time is between the summon time and the warning time
     {
-      Serial.println("2");
-      VertLaser.TopLeftCoords[0] = 122;
-      VertLaser.MoveVert += VertLaser.MoveDir * (VertLaser.Speed / fps);
-      MoveVertInt = VertLaser.MoveVert;
-      if (((VertLaser.TopLeftCoords[1] + MoveVertInt) > (63 - VertLaser.BitmapData[1])) or ((VertLaser.TopLeftCoords[1] + MoveVertInt) < 0))        // Exceeds boundaries
+      //Serial.println("2");
+      VertLaser.TopLeftCoords[0] = 122;                                                                                                             // Set the horizontal position
+      VertLaser.MoveVert += VertLaser.MoveDir * (VertLaser.Speed / fps);                                                                            // Increase the amount the laser has to move using the speed. The direction changes the sign of the value.
+      MoveVertInt = VertLaser.MoveVert;                                                                                                             // Round down the moving value into an integer (Pixels move in integers)
+      if (((VertLaser.TopLeftCoords[1] + MoveVertInt) > (63 - VertLaser.BitmapData[1])) or ((VertLaser.TopLeftCoords[1] + MoveVertInt) < 0))        // Check if moving the laser would make it go out of the screens boundaries
       {
-        VertLaser.MoveVert = 0;
-        VertLaser.MoveDir = -VertLaser.MoveDir;
+        VertLaser.MoveVert = 0;                                                                                                                     // If it does reset the moving value
+        VertLaser.MoveDir = -VertLaser.MoveDir;                                                                                                     // Flip the moving direction
       }
       else
       {
-        VertLaser.TopLeftCoords[1] += MoveVertInt;
-        VertLaser.MoveVert -= MoveVertInt;
+        VertLaser.TopLeftCoords[1] += MoveVertInt;                                                                                                  // If not then move the laser
+        VertLaser.MoveVert -= MoveVertInt;                                                                                                          // Remove the amount that the laser moved from the float value
       }
-      u8g2.drawXBM(VertLaser.TopLeftCoords[0], VertLaser.TopLeftCoords[1], VertLaser.BitmapData[0], VertLaser.BitmapData[1], VertLaser.PntBitmap);
-      u8g2.setDrawColor(0);
-      u8g2.drawPixel((VertLaser.TopLeftCoords[0] - 1), (VertLaser.TopLeftCoords[1] + 3));
-      u8g2.setDrawColor(1);
+      u8g2.drawXBM(VertLaser.TopLeftCoords[0], VertLaser.TopLeftCoords[1], VertLaser.BitmapData[0], VertLaser.BitmapData[1], VertLaser.PntBitmap);  // Draw the laser after it moved
+      u8g2.setDrawColor(0);                                                                                                                         // Change color to black
+      u8g2.drawPixel((VertLaser.TopLeftCoords[0] - 1), (VertLaser.TopLeftCoords[1] + 3));                                                           // Draw the black pixel on the boundry line
+      u8g2.setDrawColor(1);                                                                                                                         // Change the color to white
     }
-    else if(VertLaser.ActiveTime > ((1000 * VertLaser.Loops * (116.0 / VertLaser.Speed)) + VertLaser.SummonTime))                                                                    // Went through all the loops. The constant is 116, cause that's the number of pixels that the laser crosses in a loop (12 pixels due to the 3 height difference)
+    else if(VertLaser.ActiveTime > ((1000 * VertLaser.Loops * (116.0 / VertLaser.Speed)) + VertLaser.SummonTime))                                   // Check if the laser has traveled all the loops (The active time is more than it needs to summon and travel the loops). The constant is 116, cause that's the number of pixels that the laser crosses in a loop (12 pixels from 128 due to the 3 pixel height difference from the middle of the laser)
     {
-      if(VertLaser.ActiveTime < ((1000 * VertLaser.Loops * (116.0 / VertLaser.Speed)) + (2 * VertLaser.SummonTime)))
+      if(VertLaser.ActiveTime < ((1000 * VertLaser.Loops * (116.0 / VertLaser.Speed)) + (2 * VertLaser.SummonTime)))                                // If the laser has not been unsummoned (The active time is less than the time it takes to travel the loops and the summon time twice)
       {
         Serial.println("5");
-        VertLaser.Shooting = false;
-        int TempModulus = (1000 * VertLaser.Loops * (116.0 / VertLaser.Speed)) + VertLaser.SummonTime;
+        VertLaser.Shooting = false;                                                                                                                 // Turn shooting off so no hits are detected
+        int TempModulus = (1000 * VertLaser.Loops * (116.0 / VertLaser.Speed)) + VertLaser.SummonTime;                                              // Use the time this starts as a modulus, so that the active time becomes back to 0
         //Serial.println(VertLaser.ActiveTime);
         //Serial.println(TempModulus);
         //Serial.println(((VertLaser.ActiveTime % TempModulus) * (129 - 122)) / VertLaser.SummonTime);
-        VertLaser.TopLeftCoords[0] = 122 + (((VertLaser.ActiveTime % TempModulus) * (129 - 122)) / VertLaser.SummonTime);
-        u8g2.drawXBM(VertLaser.TopLeftCoords[0], VertLaser.TopLeftCoords[1], VertLaser.BitmapData[0], VertLaser.BitmapData[1], VertLaser.PntBitmap);
+        VertLaser.TopLeftCoords[0] = 122 + (((VertLaser.ActiveTime % TempModulus) * (129 - 122)) / VertLaser.SummonTime);                           // Move the laser back out of bounds in a linear function
+        u8g2.drawXBM(VertLaser.TopLeftCoords[0], VertLaser.TopLeftCoords[1], VertLaser.BitmapData[0], VertLaser.BitmapData[1], VertLaser.PntBitmap);// Draw the laser in the new position
+        // Draw the black pixel
         u8g2.setDrawColor(0);
         u8g2.drawPixel((VertLaser.TopLeftCoords[0] - 1), (VertLaser.TopLeftCoords[1] + 3));
         u8g2.setDrawColor(1);
       }
-      else
+      else                                                                                                                                          // Otherwise the laser has finished unsummoning
       {
-        Serial.println("6");
-        Dump_VertLaser();
-        Deactivate_VertLaser();
+        //Serial.println("6");
+        //Dump_VertLaser();
+        Deactivate_VertLaser();                                                                                                                     // Deactivate the laser
         return;
       }
     }
-    else
+    else                                                                                                                                            // Otherwise the laser is between the warning time and the unsummoning time
     {
-      if(((VertLaser.ActiveTime - VertLaser.WarningTime) % (VertLaser.FireTime + VertLaser.SafeTime)) < VertLaser.FireTime)                         // Shooting
+      if(((VertLaser.ActiveTime - VertLaser.WarningTime) % (VertLaser.FireTime + VertLaser.SafeTime)) < VertLaser.FireTime)                         // Check if it is the firing time
       {
-        Serial.println("3");
-        VertLaser.Shooting = true;
-        VertLaser.TopLeftCoords[0] = 122;
-        VertLaser.MoveVert += VertLaser.MoveDir * (VertLaser.Speed / fps);
+        //Serial.println("3");
+        VertLaser.Shooting = true;                                                                                                                  // Set the laser as shooting so hits can be detected
+        VertLaser.TopLeftCoords[0] = 122;                                                                                                           // Set the laser in the correct positioning horizontally
+        // Do the stuff to move the laser vertically (Same as the method in the warning period)
+        VertLaser.MoveVert += VertLaser.MoveDir * (VertLaser.Speed / fps);                                                                      
         MoveVertInt = VertLaser.MoveVert;
-        if (((VertLaser.TopLeftCoords[1] + MoveVertInt) > (63 - VertLaser.BitmapData[1])) or ((VertLaser.TopLeftCoords[1] + MoveVertInt) < 0))                                    // Exceeds boundaries
+        if (((VertLaser.TopLeftCoords[1] + MoveVertInt) > (63 - VertLaser.BitmapData[1])) or ((VertLaser.TopLeftCoords[1] + MoveVertInt) < 0))
         {
           VertLaser.MoveVert = 0;
           VertLaser.MoveDir = -VertLaser.MoveDir;
@@ -366,14 +365,15 @@ void Display_VertLaser()
           VertLaser.TopLeftCoords[1] += MoveVertInt;
           VertLaser.MoveVert -= MoveVertInt;
         }
-        u8g2.drawXBM(VertLaser.TopLeftCoords[0], VertLaser.TopLeftCoords[1], VertLaser.BitmapData[0], VertLaser.BitmapData[1], VertLaser.PntBitmap);
-        u8g2.drawHLine(13, (VertLaser.TopLeftCoords[1] + 3), 115);
+        u8g2.drawXBM(VertLaser.TopLeftCoords[0], VertLaser.TopLeftCoords[1], VertLaser.BitmapData[0], VertLaser.BitmapData[1], VertLaser.PntBitmap);// Draw the laser
+        u8g2.drawHLine(13, (VertLaser.TopLeftCoords[1] + 3), 115);                                                                                  // Draw the laser beam, which is a line going through the middle of the laser
       }
-      else
+      else                                                                                                                                          // Otherwise the laser is in the safe period
       {
-        Serial.println("4");
-        VertLaser.Shooting = false;
-        VertLaser.TopLeftCoords[0] = 122;
+        //Serial.println("4");
+        VertLaser.Shooting = false;                                                                                                                 // Set the laser as not shooting
+        VertLaser.TopLeftCoords[0] = 122;                                                                                                           // Set the laser position horizontally
+        // Do the moving procedure
         VertLaser.MoveVert += VertLaser.MoveDir * (VertLaser.Speed / fps);
         MoveVertInt = VertLaser.MoveVert;
         if (((VertLaser.TopLeftCoords[1] + MoveVertInt) > (63 - VertLaser.BitmapData[1])) or ((VertLaser.TopLeftCoords[1] + MoveVertInt) < 0))                                    // Exceeds boundaries
@@ -386,16 +386,16 @@ void Display_VertLaser()
           VertLaser.TopLeftCoords[1] += MoveVertInt;
           VertLaser.MoveVert -= MoveVertInt;
         }
-        u8g2.drawXBM(VertLaser.TopLeftCoords[0], VertLaser.TopLeftCoords[1], VertLaser.BitmapData[0], VertLaser.BitmapData[1], VertLaser.PntBitmap);
+        u8g2.drawXBM(VertLaser.TopLeftCoords[0], VertLaser.TopLeftCoords[1], VertLaser.BitmapData[0], VertLaser.BitmapData[1], VertLaser.PntBitmap);// Draw the laser bitmap
         u8g2.setDrawColor(0);
-        u8g2.drawPixel((VertLaser.TopLeftCoords[0] - 1), (VertLaser.TopLeftCoords[1] + 3));
+        u8g2.drawPixel((VertLaser.TopLeftCoords[0] - 1), (VertLaser.TopLeftCoords[1] + 3));                                                         // Draw the black pixel
         u8g2.setDrawColor(1);
       }
     }
   }
-  else
+  else                                                                                                                                              // Otherwise the laser is not active
   {
-    return;
+    return;                                                                                                                                         // In that case don't display anything
   }
 }
 
@@ -849,26 +849,32 @@ void Laser_Detect_Hit()
   }
 }
 
+// This function detects if the vertical laser has hit the player
 void VertLaser_Hit_Detect()
 {
-  if(Player.Type == 0)
+  if(Player.Type == 0)                                                            // If player is invincible
   {
-    return;
+    return;                                                                       // Return
   }
-  else if(VertLaser.Active)
+  else if(VertLaser.Active and VertLaser.Shooting)                                // If the vertical laser is both active and shoooting
   {
-    if((Player.TopLeftCoords[1] >= (VertLaser.TopLeftCoords[1] + 3)) and (Player.BottomRightCoords[1] <= (VertLaser.TopLeftCoords[1] + 3)))
+    if((Player.TopLeftCoords[1] <= (VertLaser.TopLeftCoords[1] + 3)) and (Player.BottomRightCoords[1] >= (VertLaser.TopLeftCoords[1] + 3)))     // If the player is touching the laser beam
     {
-      Record_Hit();
+      //Serial.println("VertLaser shot player");
+      Record_Hit();                                                               // Record a hit
     }
-    else
+    else                                                                          // Otherwise he is not touching the beam
     {
-      return;
+      //Serial.println(Player.TopLeftCoords[1] <= (VertLaser.TopLeftCoords[1] + 3));
+      //Serial.println(Player.BottomRightCoords[1] >= (VertLaser.TopLeftCoords[1] + 3));
+      //Serial.println("Player not in range");
+      return;                                                                     // Return
     }
   }
-  else
+  else                                                                            // Otherwise there is no laser beam
   {
-    return;
+    //Serial.println("VertLaser not shooting");
+    return;                                                                       // Return
   }
 }
 
@@ -927,6 +933,7 @@ void Detect_Hit()
 {
   //Serial.println("Detect Hit Ran 1");
   Laser_Detect_Hit();                                                             // Detect a hit from the laser
+  VertLaser_Hit_Detect();                                                         // Detect a hit from the vertical laser
   //Serial.println("Detect Hit Ran 2");
   for(int i = 0; i < ExplosionsMax; i++)                                          // Cycle through all the explosions
   {
